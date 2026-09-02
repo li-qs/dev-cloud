@@ -1,0 +1,10 @@
+server_addr: :8080
+log_level: info
+
+postgres: host=127.0.0.1 port=5432 user=postgres dbname=dev-cloud password=123456
+
+jwt_secret: "change-me-to-a-random-secret"
+token_salt: "change-me-to-a-random-salt"
+access_ttl: 900
+refresh_ttl: 604800
+cookie_secure: false
