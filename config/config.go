@@ -15,13 +15,20 @@ const (
 )
 
 type Config struct {
-	ServerAddr   string   `yaml:"server_addr"`
-	Postgres     string   `yaml:"postgres"`
-	JWTSecret    string   `yaml:"jwt_secret"`
-	TokenSalt    string   `yaml:"token_salt"`
-	AccessTTL    int      `yaml:"access_ttl"`
-	RefreshTTL   int      `yaml:"refresh_ttl"`
-	CookieSecure *bool    `yaml:"cookie_secure"`
+	ServerAddr   string      `yaml:"server_addr"`
+	Postgres     string      `yaml:"postgres"`
+	Redis        RedisConfig `yaml:"redis"`
+	JWTSecret    string      `yaml:"jwt_secret"`
+	TokenSalt    string      `yaml:"token_salt"`
+	AccessTTL    int         `yaml:"access_ttl"`
+	RefreshTTL   int         `yaml:"refresh_ttl"`
+	CookieSecure *bool       `yaml:"cookie_secure"`
+}
+
+type RedisConfig struct {
+	Addr     string `yaml:"addr"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
 }
 
 func LoadFile(path string, cfg *Config) error {

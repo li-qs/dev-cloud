@@ -3,8 +3,10 @@
 package ent
 
 import (
+	"devcloud/ent/refreshtoken"
+	"devcloud/ent/resource"
 	"devcloud/ent/schema"
-	"devcloud/ent/token"
+	"devcloud/ent/task"
 	"devcloud/ent/user"
 	"time"
 )
@@ -13,24 +15,62 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	tokenFields := schema.Token{}.Fields()
-	_ = tokenFields
-	// tokenDescUID is the schema descriptor for uid field.
-	tokenDescUID := tokenFields[0].Descriptor()
-	// token.UIDValidator is a validator for the "uid" field. It is called by the builders before save.
-	token.UIDValidator = tokenDescUID.Validators[0].(func(int) error)
-	// tokenDescToken is the schema descriptor for token field.
-	tokenDescToken := tokenFields[1].Descriptor()
-	// token.TokenValidator is a validator for the "token" field. It is called by the builders before save.
-	token.TokenValidator = tokenDescToken.Validators[0].(func(string) error)
-	// tokenDescUserAgent is the schema descriptor for user_agent field.
-	tokenDescUserAgent := tokenFields[2].Descriptor()
-	// token.UserAgentValidator is a validator for the "user_agent" field. It is called by the builders before save.
-	token.UserAgentValidator = tokenDescUserAgent.Validators[0].(func(string) error)
-	// tokenDescCeratedAt is the schema descriptor for cerated_at field.
-	tokenDescCeratedAt := tokenFields[4].Descriptor()
-	// token.DefaultCeratedAt holds the default value on creation for the cerated_at field.
-	token.DefaultCeratedAt = tokenDescCeratedAt.Default.(func() time.Time)
+	refreshtokenFields := schema.RefreshToken{}.Fields()
+	_ = refreshtokenFields
+	// refreshtokenDescTokenHash is the schema descriptor for token_hash field.
+	refreshtokenDescTokenHash := refreshtokenFields[1].Descriptor()
+	// refreshtoken.TokenHashValidator is a validator for the "token_hash" field. It is called by the builders before save.
+	refreshtoken.TokenHashValidator = refreshtokenDescTokenHash.Validators[0].(func(string) error)
+	// refreshtokenDescCreatedAt is the schema descriptor for created_at field.
+	refreshtokenDescCreatedAt := refreshtokenFields[3].Descriptor()
+	// refreshtoken.DefaultCreatedAt holds the default value on creation for the created_at field.
+	refreshtoken.DefaultCreatedAt = refreshtokenDescCreatedAt.Default.(func() time.Time)
+	resourceFields := schema.Resource{}.Fields()
+	_ = resourceFields
+	// resourceDescName is the schema descriptor for name field.
+	resourceDescName := resourceFields[1].Descriptor()
+	// resource.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	resource.NameValidator = resourceDescName.Validators[0].(func(string) error)
+	// resourceDescType is the schema descriptor for type field.
+	resourceDescType := resourceFields[2].Descriptor()
+	// resource.TypeValidator is a validator for the "type" field. It is called by the builders before save.
+	resource.TypeValidator = resourceDescType.Validators[0].(func(string) error)
+	// resourceDescProvider is the schema descriptor for provider field.
+	resourceDescProvider := resourceFields[3].Descriptor()
+	// resource.DefaultProvider holds the default value on creation for the provider field.
+	resource.DefaultProvider = resourceDescProvider.Default.(string)
+	// resource.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	resource.ProviderValidator = resourceDescProvider.Validators[0].(func(string) error)
+	// resourceDescCreatedAt is the schema descriptor for created_at field.
+	resourceDescCreatedAt := resourceFields[8].Descriptor()
+	// resource.DefaultCreatedAt holds the default value on creation for the created_at field.
+	resource.DefaultCreatedAt = resourceDescCreatedAt.Default.(func() time.Time)
+	// resourceDescUpdatedAt is the schema descriptor for updated_at field.
+	resourceDescUpdatedAt := resourceFields[9].Descriptor()
+	// resource.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	resource.DefaultUpdatedAt = resourceDescUpdatedAt.Default.(func() time.Time)
+	// resource.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	resource.UpdateDefaultUpdatedAt = resourceDescUpdatedAt.UpdateDefault.(func() time.Time)
+	taskFields := schema.Task{}.Fields()
+	_ = taskFields
+	// taskDescAttempts is the schema descriptor for attempts field.
+	taskDescAttempts := taskFields[4].Descriptor()
+	// task.DefaultAttempts holds the default value on creation for the attempts field.
+	task.DefaultAttempts = taskDescAttempts.Default.(int)
+	// taskDescMaxAttempts is the schema descriptor for max_attempts field.
+	taskDescMaxAttempts := taskFields[5].Descriptor()
+	// task.DefaultMaxAttempts holds the default value on creation for the max_attempts field.
+	task.DefaultMaxAttempts = taskDescMaxAttempts.Default.(int)
+	// taskDescCreatedAt is the schema descriptor for created_at field.
+	taskDescCreatedAt := taskFields[10].Descriptor()
+	// task.DefaultCreatedAt holds the default value on creation for the created_at field.
+	task.DefaultCreatedAt = taskDescCreatedAt.Default.(func() time.Time)
+	// taskDescUpdatedAt is the schema descriptor for updated_at field.
+	taskDescUpdatedAt := taskFields[11].Descriptor()
+	// task.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	task.DefaultUpdatedAt = taskDescUpdatedAt.Default.(func() time.Time)
+	// task.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	task.UpdateDefaultUpdatedAt = taskDescUpdatedAt.UpdateDefault.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescUsername is the schema descriptor for username field.
@@ -45,8 +85,18 @@ func init() {
 	userDescNickname := userFields[2].Descriptor()
 	// user.NicknameValidator is a validator for the "nickname" field. It is called by the builders before save.
 	user.NicknameValidator = userDescNickname.Validators[0].(func(string) error)
+	// userDescStatus is the schema descriptor for status field.
+	userDescStatus := userFields[3].Descriptor()
+	// user.DefaultStatus holds the default value on creation for the status field.
+	user.DefaultStatus = userDescStatus.Default.(int8)
 	// userDescCreatedAt is the schema descriptor for created_at field.
-	userDescCreatedAt := userFields[3].Descriptor()
+	userDescCreatedAt := userFields[4].Descriptor()
 	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
 	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
+	// userDescUpdatedAt is the schema descriptor for updated_at field.
+	userDescUpdatedAt := userFields[5].Descriptor()
+	// user.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	user.DefaultUpdatedAt = userDescUpdatedAt.Default.(func() time.Time)
+	// user.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	user.UpdateDefaultUpdatedAt = userDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

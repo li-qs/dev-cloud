@@ -1,101 +1,66 @@
 package web
 
 import (
-	"bytes"
-	"devcloud/config"
-	"devcloud/ent"
-	"devcloud/web/domain/health"
-	"devcloud/web/domain/user"
-	myMiddleware "devcloud/web/middleware"
-	"sync"
+	"devcloud/app"
+	"devcloud/web/handler"
+	"devcloud/web/middleware"
 
-	"github.com/bytedance/sonic"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
-	"github.com/labstack/echo/v5/middleware"
+	echomw "github.com/labstack/echo/v5/middleware"
 )
 
-func NewServer(cfg *config.Config, db *ent.Client) *echo.Echo {
+func NewServer(app *app.App, cookieSecure bool, jwtSecret string) *echo.Echo {
 	e := echo.NewWithConfig(echo.Config{
-		JSONSerializer: &JSONSerializer{},
-		Validator:      &Validator{validator: validator.New()},
+		HTTPErrorHandler: HTTPErrorHandler,
+		JSONSerializer:   &JSONSerializer{},
+		Validator:        &Validator{validator: validator.New()},
 	})
 
-	e.Use(middleware.RequestID())
-	e.Use(middleware.RequestLogger())
-	e.Use(middleware.Recover())
+	e.Use(echomw.RequestID())
+	e.Use(echomw.RequestLogger())
+	e.Use(echomw.Recover())
 
-	healthHandler := health.New(db)
-	userHandler := user.New(cfg, db)
+	loginLimiter := echomw.RateLimiterWithConfig(echomw.RateLimiterConfig{
+		Store: echomw.NewRateLimiterMemoryStore(10),
+		IdentifierExtractor: func(c *echo.Context) (string, error) {
+			return c.RealIP(), nil
+		},
+	})
+
+	health := handler.NewHealth()
+	user := handler.NewUser(cookieSecure, app.UserService)
+	resource := handler.NewResource(app.ResourceService)
+	task := handler.NewTask(app.TaskService)
 
 	{
-		e.GET("/health", healthHandler.Liveness)
-		e.GET("/ready", healthHandler.Readiness)
+		e.GET("/health", health.Liveness)
 	}
 
 	api := e.Group("/api")
 	{
-		api.POST("/login", userHandler.Login, middleware.RateLimiterWithConfig(middleware.RateLimiterConfig{
-			Store: middleware.NewRateLimiterMemoryStore(10),
-			IdentifierExtractor: func(c *echo.Context) (string, error) {
-				return c.RealIP(), nil
-			},
-		}))
-		api.POST("/logout", userHandler.Logout)
-		api.POST("/refresh", userHandler.RefreshToken)
+		api.POST("/login", user.Login, loginLimiter)
+		api.POST("/refresh", user.RefreshToken)
 	}
 
-	authApi := e.Group("/api")
-	authApi.Use(myMiddleware.Auth(cfg.JWTSecret))
+	authApi := api.Group("")
+	authApi.Use(middleware.Auth(jwtSecret))
 	{
-		authApi.GET("/user", userHandler.UserInfo)
-		authApi.PUT("/user/password", userHandler.UpdatePassword)
+		authApi.POST("/logout", user.Logout)
+		authApi.PUT("/user/password", user.UpdatePassword)
+		authApi.GET("/user", user.UserInfo)
+
+		authApi.GET("/resources", resource.List)
+		authApi.POST("/resources", resource.Create)
+		authApi.GET("/resources/:id", resource.Get)
+		authApi.DELETE("/resources/:id", resource.Delete)
+
+		authApi.POST("/resources/:id/start", resource.Start)
+		authApi.POST("/resources/:id/stop", resource.Stop)
+		authApi.POST("/resources/:id/restart", resource.Restart)
+
+		authApi.GET("/tasks/:id", task.Get)
 	}
 
 	return e
-}
-
-type Validator struct {
-	validator *validator.Validate
-}
-
-func (v *Validator) Validate(i any) error {
-	if err := v.validator.Struct(i); err != nil {
-		return echo.ErrBadRequest.Wrap(err)
-	}
-	return nil
-}
-
-const maxPooledJSONBuf = 1 << 16 // 64 KiB
-
-var jsonBufPool = sync.Pool{New: newJSONBuf}
-
-func newJSONBuf() any { return new(bytes.Buffer) }
-
-type JSONSerializer struct{}
-
-func (s *JSONSerializer) Serialize(c *echo.Context, target any, indent string) error {
-	enc := sonic.ConfigFastest.NewEncoder(c.Response())
-	if indent != "" {
-		enc.SetIndent("", indent)
-	}
-	return enc.Encode(target)
-}
-
-func (s *JSONSerializer) Deserialize(c *echo.Context, target any) error {
-	buf := jsonBufPool.Get().(*bytes.Buffer)
-	buf.Reset()
-	defer func() {
-		if buf.Cap() <= maxPooledJSONBuf {
-			jsonBufPool.Put(buf)
-		}
-	}()
-
-	if _, err := buf.ReadFrom(c.Request().Body); err != nil {
-		return echo.ErrBadRequest.Wrap(err)
-	}
-	if err := sonic.Unmarshal(buf.Bytes(), target); err != nil {
-		return echo.ErrBadRequest.Wrap(err)
-	}
-	return nil
 }

@@ -6,8 +6,6 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-const CodeOK = 0
-
 type Response[T any] struct {
 	Code    int    `json:"code"`
 	Message string `json:"message,omitempty"`
@@ -18,31 +16,28 @@ type ListData[T any] struct {
 	Page     int `json:"page"`
 	PageSize int `json:"page_size"`
 	Total    int `json:"total"`
-	List     T   `json:"list"`
+	List     []T `json:"list"`
+}
+
+func JsonSuccess(c *echo.Context) error {
+	return JsonData[any](c, nil)
 }
 
 func JsonData[T any](c *echo.Context, data T) error {
 	return c.JSON(http.StatusOK, &Response[T]{
-		Code: CodeOK,
+		Code: http.StatusOK,
 		Data: data,
 	})
 }
 
-func JsonList[T any](c *echo.Context, list T, page int, pageSize int, total int) error {
+func JsonList[T any](c *echo.Context, list []T, page int, pageSize int, total int) error {
 	return c.JSON(http.StatusOK, &Response[ListData[T]]{
-		Code: CodeOK,
+		Code: http.StatusOK,
 		Data: ListData[T]{
 			List:     list,
 			Page:     page,
 			PageSize: pageSize,
 			Total:    total,
 		},
-	})
-}
-
-func JsonError(c *echo.Context, code int, msg string) error {
-	return c.JSON(http.StatusOK, &Response[any]{
-		Code:    code,
-		Message: msg,
 	})
 }

@@ -9,8 +9,9 @@ import (
 	"os/signal"
 	"syscall"
 
+	"devcloud/app"
 	"devcloud/config"
-	"devcloud/ent"
+	"devcloud/storage"
 	"devcloud/web"
 
 	"github.com/labstack/echo/v5"
@@ -47,17 +48,25 @@ func run() error {
 		return fmt.Errorf("load config: %w", err)
 	}
 
-	client, err := ent.Open("postgres", cfg.Postgres)
+	psql, err := storage.NewPostgres(&cfg)
 	if err != nil {
 		return fmt.Errorf("open postgresql: %w", err)
 	}
-	defer client.Close()
+	defer psql.Close()
 
-	if err := client.Schema.Create(ctx); err != nil {
+	if err := psql.Schema.Create(ctx); err != nil {
 		return fmt.Errorf("create database schema: %w", err)
 	}
 
-	webServer := web.NewServer(&cfg, client)
+	rdb, err := storage.NewRedis(&cfg)
+	if err != nil {
+		return fmt.Errorf("open redis: %w", err)
+	}
+	defer rdb.Close()
+
+	app := app.New(&cfg, psql, rdb)
+
+	webServer := web.NewServer(app, *cfg.CookieSecure, cfg.JWTSecret)
 	webErr := make(chan error, 1)
 	go func() {
 		sc := echo.StartConfig{

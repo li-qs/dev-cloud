@@ -6,8 +6,14 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Token is the predicate function for token builders.
-type Token func(*sql.Selector)
+// RefreshToken is the predicate function for refreshtoken builders.
+type RefreshToken func(*sql.Selector)
+
+// Resource is the predicate function for resource builders.
+type Resource func(*sql.Selector)
+
+// Task is the predicate function for task builders.
+type Task func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

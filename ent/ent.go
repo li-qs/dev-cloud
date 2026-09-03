@@ -4,7 +4,9 @@ package ent
 
 import (
 	"context"
-	"devcloud/ent/token"
+	"devcloud/ent/refreshtoken"
+	"devcloud/ent/resource"
+	"devcloud/ent/task"
 	"devcloud/ent/user"
 	"errors"
 	"fmt"
@@ -74,8 +76,10 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			token.Table: token.ValidColumn,
-			user.Table:  user.ValidColumn,
+			refreshtoken.Table: refreshtoken.ValidColumn,
+			resource.Table:     resource.ValidColumn,
+			task.Table:         task.ValidColumn,
+			user.Table:         user.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

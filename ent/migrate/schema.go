@@ -8,36 +8,99 @@ import (
 )
 
 var (
-	// TokensColumns holds the columns for the "tokens" table.
-	TokensColumns = []*schema.Column{
+	// RefreshTokensColumns holds the columns for the "refresh_tokens" table.
+	RefreshTokensColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "token", Type: field.TypeString, Unique: true},
-		{Name: "user_agent", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "token_hash", Type: field.TypeString, Unique: true, Size: 64},
 		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "cerated_at", Type: field.TypeTime},
-		{Name: "uid", Type: field.TypeInt},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "revoked_at", Type: field.TypeTime, Nullable: true},
 	}
-	// TokensTable holds the schema information for the "tokens" table.
-	TokensTable = &schema.Table{
-		Name:       "tokens",
-		Columns:    TokensColumns,
-		PrimaryKey: []*schema.Column{TokensColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
+	// RefreshTokensTable holds the schema information for the "refresh_tokens" table.
+	RefreshTokensTable = &schema.Table{
+		Name:       "refresh_tokens",
+		Columns:    RefreshTokensColumns,
+		PrimaryKey: []*schema.Column{RefreshTokensColumns[0]},
+		Indexes: []*schema.Index{
 			{
-				Symbol:     "tokens_users_access_tokens",
-				Columns:    []*schema.Column{TokensColumns[5]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				Name:    "refreshtoken_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{RefreshTokensColumns[1]},
+			},
+			{
+				Name:    "refreshtoken_token_hash",
+				Unique:  false,
+				Columns: []*schema.Column{RefreshTokensColumns[2]},
+			},
+		},
+	}
+	// ResourcesColumns holds the columns for the "resources" table.
+	ResourcesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "name", Type: field.TypeString, Size: 128},
+		{Name: "type", Type: field.TypeString, Size: 32},
+		{Name: "provider", Type: field.TypeString, Size: 32, Default: "docker"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"CREATING", "RUNNING", "STOPPING", "STOPPED", "STARTING", "RESTARTING", "DELETING", "DELETED", "FAILED"}, Default: "CREATING"},
+		{Name: "config", Type: field.TypeJSON, Nullable: true},
+		{Name: "credential", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "error_message", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "deleted_at", Type: field.TypeTime, Nullable: true},
+	}
+	// ResourcesTable holds the schema information for the "resources" table.
+	ResourcesTable = &schema.Table{
+		Name:       "resources",
+		Columns:    ResourcesColumns,
+		PrimaryKey: []*schema.Column{ResourcesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "resource_user_id",
+				Unique:  false,
+				Columns: []*schema.Column{ResourcesColumns[1]},
+			},
+		},
+	}
+	// TasksColumns holds the columns for the "tasks" table.
+	TasksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "resource_id", Type: field.TypeInt},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"CREATE_RESOURCE", "START_RESOURCE", "STOP_RESOURCE", "RESTART_RESOURCE", "DELETE_RESOURCE"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PENDING", "RUNNING", "SUCCESS", "FAILED"}, Default: "PENDING"},
+		{Name: "attempts", Type: field.TypeInt, Default: 0},
+		{Name: "max_attempts", Type: field.TypeInt, Default: 3},
+		{Name: "payload", Type: field.TypeJSON, Nullable: true},
+		{Name: "error_message", Type: field.TypeString, Nullable: true, Size: 2147483647},
+		{Name: "started_at", Type: field.TypeTime, Nullable: true},
+		{Name: "finished_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// TasksTable holds the schema information for the "tasks" table.
+	TasksTable = &schema.Table{
+		Name:       "tasks",
+		Columns:    TasksColumns,
+		PrimaryKey: []*schema.Column{TasksColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "task_user_id_resource_id",
+				Unique:  false,
+				Columns: []*schema.Column{TasksColumns[1], TasksColumns[2]},
 			},
 		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "username", Type: field.TypeString, Unique: true},
-		{Name: "password", Type: field.TypeString},
-		{Name: "nickname", Type: field.TypeString},
+		{Name: "username", Type: field.TypeString, Unique: true, Size: 64},
+		{Name: "password", Type: field.TypeString, Size: 255},
+		{Name: "nickname", Type: field.TypeString, Nullable: true, Size: 64},
+		{Name: "status", Type: field.TypeInt8, Default: 1},
 		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -47,11 +110,12 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		TokensTable,
+		RefreshTokensTable,
+		ResourcesTable,
+		TasksTable,
 		UsersTable,
 	}
 )
 
 func init() {
-	TokensTable.ForeignKeys[0].RefTable = UsersTable
 }
