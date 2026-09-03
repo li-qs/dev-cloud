@@ -2,9 +2,9 @@ package handler
 
 import (
 	"devcloud/service"
-	"devcloud/web/dto"
-	"devcloud/web/reqctx"
-	"devcloud/web/response"
+	"devcloud/web/handler/dto"
+	"devcloud/web/handler/reqctx"
+	"devcloud/web/handler/response"
 	"strconv"
 
 	"github.com/labstack/echo/v5"

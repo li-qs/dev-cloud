@@ -5,8 +5,6 @@ import (
 	"devcloud/ent"
 	"devcloud/repo"
 	"devcloud/utils"
-	"devcloud/web/errmsg"
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -86,30 +84,40 @@ func (s *User) GenerateTokens(ctx context.Context, user *ent.User) (string, stri
 	return accessToken, refreshRaw, s.Options.AccessTokenExpireSeconds, nil
 }
 
-func (s *User) RefreshTokens(ctx context.Context, refreshRaw string) (string, string, int, error) {
+type RefreshToken struct {
+	AccessToken  string
+	RefreshToken string
+	ExpiresIn    int
+}
+
+func (s *User) RefreshTokens(ctx context.Context, refreshRaw string) (token *RefreshToken, valid bool, err error) {
 	tokenHash := s.hashRefreshToken(refreshRaw)
 	rt, err := s.tokenRepo.GetByToken(ctx, tokenHash)
 	if err != nil {
-		return "", "", 0, fmt.Errorf("find refresh token: %w", err)
+		return
 	}
 	if time.Now().After(rt.ExpiresAt) {
 		s.tokenRepo.Delete(ctx, rt.ID)
-		return "", "", 0, errmsg.ErrInvalidToken
+		return
 	}
 
 	user, err := s.userRepo.GetByID(ctx, rt.UserID)
 	if err != nil {
-		return "", "", 0, err
+		return
 	}
 
 	accessToken, newRefreshRaw, expiresIn, err := s.GenerateTokens(ctx, user)
 	if err != nil {
-		return "", "", 0, err
+		return
 	}
 
-	_ = s.tokenRepo.Delete(ctx, rt.ID)
+	s.tokenRepo.Delete(ctx, rt.ID)
 
-	return accessToken, newRefreshRaw, expiresIn, nil
+	return &RefreshToken{
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshRaw,
+		ExpiresIn:    expiresIn,
+	}, true, nil
 }
 
 func (s *User) Logout(ctx context.Context, refreshRaw string) error {

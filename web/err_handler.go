@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"devcloud/web/errmsg"
-	"devcloud/web/response"
+	"devcloud/web/handler/errmsg"
+	"devcloud/web/handler/response"
 
 	"github.com/labstack/echo/v5"
 )

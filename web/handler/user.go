@@ -2,12 +2,9 @@ package handler
 
 import (
 	"devcloud/service"
-	"devcloud/web/dto"
-	"devcloud/web/errmsg"
-	"devcloud/web/reqctx"
-	"devcloud/web/response"
-	"errors"
-	"log/slog"
+	"devcloud/web/handler/dto"
+	"devcloud/web/handler/reqctx"
+	"devcloud/web/handler/response"
 	"net/http"
 
 	"github.com/labstack/echo/v5"
@@ -73,21 +70,20 @@ func (h *User) RefreshToken(c *echo.Context) error {
 		return echo.ErrUnauthorized
 	}
 
-	accessToken, refreshToken, expireIn, err := h.userSrv.RefreshTokens(c.Request().Context(), cookie.Value)
+	t, valid, err := h.userSrv.RefreshTokens(c.Request().Context(), cookie.Value)
 	if err != nil {
-		slog.Error("RefreshTokens failed", "error", err)
-		if errors.Is(err, errmsg.ErrInvalidToken) {
-			setRefreshCookie(c, "", -1, h.cookieSecure)
-			return echo.ErrUnauthorized
-		}
 		return err
 	}
+	if !valid {
+		setRefreshCookie(c, "", -1, h.cookieSecure)
+		return echo.ErrUnauthorized
+	}
 
-	setRefreshCookie(c, refreshToken, h.userSrv.Options.RefreshTokenExpireSeconds, h.cookieSecure)
+	setRefreshCookie(c, t.RefreshToken, h.userSrv.Options.RefreshTokenExpireSeconds, h.cookieSecure)
 	return response.JsonData(c, dto.LoginResponse{
-		AccessToken: accessToken,
+		AccessToken: t.AccessToken,
 		TokenType:   "Bearer",
-		ExpiresIn:   expireIn,
+		ExpiresIn:   t.ExpiresIn,
 	})
 }
 
