@@ -22,6 +22,8 @@ const (
 	FieldType = "type"
 	// FieldProvider holds the string denoting the provider field in the database.
 	FieldProvider = "provider"
+	// FieldRuntimeID holds the string denoting the runtime_id field in the database.
+	FieldRuntimeID = "runtime_id"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldConfig holds the string denoting the config field in the database.
@@ -47,6 +49,7 @@ var Columns = []string{
 	FieldName,
 	FieldType,
 	FieldProvider,
+	FieldRuntimeID,
 	FieldStatus,
 	FieldConfig,
 	FieldCredential,
@@ -71,10 +74,6 @@ var (
 	NameValidator func(string) error
 	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
 	TypeValidator func(string) error
-	// DefaultProvider holds the default value on creation for the "provider" field.
-	DefaultProvider string
-	// ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
-	ProviderValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -82,6 +81,31 @@ var (
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
 )
+
+// Provider defines the type for the "provider" enum field.
+type Provider string
+
+// ProviderDocker is the default value of the Provider enum.
+const DefaultProvider = ProviderDocker
+
+// Provider values.
+const (
+	ProviderDocker Provider = "docker"
+)
+
+func (pr Provider) String() string {
+	return string(pr)
+}
+
+// ProviderValidator is a validator for the "provider" field enum values. It is called by the builders before save.
+func ProviderValidator(pr Provider) error {
+	switch pr {
+	case ProviderDocker:
+		return nil
+	default:
+		return fmt.Errorf("resource: invalid enum value for provider field: %q", pr)
+	}
+}
 
 // Status defines the type for the "status" enum field.
 type Status string
@@ -142,6 +166,11 @@ func ByType(opts ...sql.OrderTermOption) OrderOption {
 // ByProvider orders the results by the provider field.
 func ByProvider(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProvider, opts...).ToFunc()
+}
+
+// ByRuntimeID orders the results by the runtime_id field.
+func ByRuntimeID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRuntimeID, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

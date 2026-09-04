@@ -1,16 +1,19 @@
 package web
 
 import (
-	"devcloud/app"
+	"devcloud/config"
+	"devcloud/repo"
+	"devcloud/store"
 	"devcloud/web/handler"
 	"devcloud/web/middleware"
+	"devcloud/web/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v5"
 	echomw "github.com/labstack/echo/v5/middleware"
 )
 
-func NewServer(app *app.App, cookieSecure bool, jwtSecret string) *echo.Echo {
+func NewServer(cfg *config.Config, repo *repo.Repo, store *store.Store) *echo.Echo {
 	e := echo.NewWithConfig(echo.Config{
 		HTTPErrorHandler: HTTPErrorHandler,
 		JSONSerializer:   &JSONSerializer{},
@@ -28,10 +31,22 @@ func NewServer(app *app.App, cookieSecure bool, jwtSecret string) *echo.Echo {
 		},
 	})
 
+	userSrv := service.NewUser(
+		repo,
+		service.UserOptions{
+			JWTSecret:                 cfg.JWTSecret,
+			TokenSalt:                 cfg.TokenSalt,
+			AccessTokenExpireSeconds:  cfg.AccessTTL,
+			RefreshTokenExpireSeconds: cfg.RefreshTTL,
+		},
+	)
+	resourceSrv := service.NewResource(repo)
+	taskSrv := service.NewTask(repo)
+
 	health := handler.NewHealth()
-	user := handler.NewUser(cookieSecure, app.UserService)
-	resource := handler.NewResource(app.ResourceService)
-	task := handler.NewTask(app.TaskService)
+	user := handler.NewUser(*cfg.CookieSecure, userSrv)
+	resource := handler.NewResource(resourceSrv)
+	task := handler.NewTask(taskSrv)
 
 	{
 		e.GET("/health", health.Liveness)
@@ -44,7 +59,7 @@ func NewServer(app *app.App, cookieSecure bool, jwtSecret string) *echo.Echo {
 	}
 
 	authApi := api.Group("")
-	authApi.Use(middleware.Auth(jwtSecret))
+	authApi.Use(middleware.Auth(cfg.JWTSecret))
 	{
 		authApi.POST("/logout", user.Logout)
 		authApi.PUT("/user/password", user.UpdatePassword)

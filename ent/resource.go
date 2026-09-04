@@ -25,7 +25,9 @@ type Resource struct {
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// Provider holds the value of the "provider" field.
-	Provider string `json:"provider,omitempty"`
+	Provider resource.Provider `json:"provider,omitempty"`
+	// RuntimeID holds the value of the "runtime_id" field.
+	RuntimeID string `json:"runtime_id,omitempty"`
 	// Status holds the value of the "status" field.
 	Status resource.Status `json:"status,omitempty"`
 	// Config holds the value of the "config" field.
@@ -52,7 +54,7 @@ func (*Resource) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case resource.FieldID, resource.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case resource.FieldName, resource.FieldType, resource.FieldProvider, resource.FieldStatus, resource.FieldCredential, resource.FieldErrorMessage:
+		case resource.FieldName, resource.FieldType, resource.FieldProvider, resource.FieldRuntimeID, resource.FieldStatus, resource.FieldCredential, resource.FieldErrorMessage:
 			values[i] = new(sql.NullString)
 		case resource.FieldCreatedAt, resource.FieldUpdatedAt, resource.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -99,7 +101,13 @@ func (_m *Resource) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field provider", values[i])
 			} else if value.Valid {
-				_m.Provider = value.String
+				_m.Provider = resource.Provider(value.String)
+			}
+		case resource.FieldRuntimeID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field runtime_id", values[i])
+			} else if value.Valid {
+				_m.RuntimeID = value.String
 			}
 		case resource.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -192,7 +200,10 @@ func (_m *Resource) String() string {
 	builder.WriteString(_m.Type)
 	builder.WriteString(", ")
 	builder.WriteString("provider=")
-	builder.WriteString(_m.Provider)
+	builder.WriteString(fmt.Sprintf("%v", _m.Provider))
+	builder.WriteString(", ")
+	builder.WriteString("runtime_id=")
+	builder.WriteString(_m.RuntimeID)
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Status))

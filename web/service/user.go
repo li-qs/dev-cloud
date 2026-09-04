@@ -12,9 +12,7 @@ import (
 )
 
 type User struct {
-	userRepo  *repo.User
-	tokenRepo *repo.RefreshToken
-
+	repo    *repo.Repo
 	Options UserOptions
 }
 
@@ -25,20 +23,13 @@ type UserOptions struct {
 	RefreshTokenExpireSeconds int
 }
 
-const (
-	UserStatusEnabled  = 1
-	UserStatusDisabled = 0
-)
-
 func NewUser(
+	repo *repo.Repo,
 	options UserOptions,
-	userRepo *repo.User,
-	tokenRepo *repo.RefreshToken,
 ) *User {
 	return &User{
-		Options:   options,
-		userRepo:  userRepo,
-		tokenRepo: tokenRepo,
+		repo:    repo,
+		Options: options,
 	}
 }
 
@@ -50,7 +41,7 @@ type jwtClaims struct {
 
 func (s *User) AuthUser(ctx context.Context, username, password string) (user *ent.User, valid bool, err error) {
 	valid = false
-	user, err = s.userRepo.GetByUsername(ctx, username)
+	user, err = s.repo.User.GetByUsername(ctx, username)
 	if err != nil {
 		return
 	}
@@ -77,7 +68,7 @@ func (s *User) GenerateTokens(ctx context.Context, user *ent.User) (string, stri
 
 	hash := s.hashRefreshToken(refreshRaw)
 	expiresAt := now.Add(time.Duration(s.Options.RefreshTokenExpireSeconds) * time.Second)
-	if err := s.tokenRepo.Create(ctx, user.ID, hash, expiresAt); err != nil {
+	if err := s.repo.RefreshToken.Create(ctx, user.ID, hash, expiresAt); err != nil {
 		return "", "", 0, err
 	}
 
@@ -92,16 +83,16 @@ type RefreshToken struct {
 
 func (s *User) RefreshTokens(ctx context.Context, refreshRaw string) (token *RefreshToken, valid bool, err error) {
 	tokenHash := s.hashRefreshToken(refreshRaw)
-	rt, err := s.tokenRepo.GetByToken(ctx, tokenHash)
+	rt, err := s.repo.RefreshToken.Get(ctx, tokenHash)
 	if err != nil {
 		return
 	}
 	if time.Now().After(rt.ExpiresAt) {
-		s.tokenRepo.Delete(ctx, rt.ID)
+		s.repo.RefreshToken.Delete(ctx, rt.ID)
 		return
 	}
 
-	user, err := s.userRepo.GetByID(ctx, rt.UserID)
+	user, err := s.repo.User.Get(ctx, rt.UserID)
 	if err != nil {
 		return
 	}
@@ -111,7 +102,7 @@ func (s *User) RefreshTokens(ctx context.Context, refreshRaw string) (token *Ref
 		return
 	}
 
-	s.tokenRepo.Delete(ctx, rt.ID)
+	s.repo.RefreshToken.Delete(ctx, rt.ID)
 
 	return &RefreshToken{
 		AccessToken:  accessToken,
@@ -122,15 +113,15 @@ func (s *User) RefreshTokens(ctx context.Context, refreshRaw string) (token *Ref
 
 func (s *User) Logout(ctx context.Context, refreshRaw string) error {
 	tokenHash := s.hashRefreshToken(refreshRaw)
-	rt, err := s.tokenRepo.GetByToken(ctx, tokenHash)
+	rt, err := s.repo.RefreshToken.Get(ctx, tokenHash)
 	if err != nil {
 		return err
 	}
-	return s.tokenRepo.Delete(ctx, rt.ID)
+	return s.repo.RefreshToken.Delete(ctx, rt.ID)
 }
 
 func (s *User) RevokeAllUserTokens(ctx context.Context, userID int) error {
-	return s.tokenRepo.DeleteByUserID(ctx, userID)
+	return s.repo.RefreshToken.DeleteByUserID(ctx, userID)
 }
 
 func (s *User) generateJWT(user *ent.User, now time.Time) (string, error) {
@@ -155,9 +146,9 @@ func (s *User) UpdatePassword(ctx context.Context, userID int, pwd string) error
 	if err != nil {
 		return err
 	}
-	return s.userRepo.UpdatePassword(ctx, userID, string(pwdHash))
+	return s.repo.User.UpdatePassword(ctx, userID, string(pwdHash))
 }
 
 func (s *User) UpdateNickname(ctx context.Context, userID int, nickname string) error {
-	return s.userRepo.UpdateNickname(ctx, userID, nickname)
+	return s.repo.User.UpdateNickname(ctx, userID, nickname)
 }

@@ -1,10 +1,11 @@
 package handler
 
 import (
-	"devcloud/service"
+	"devcloud/ent/resource"
 	"devcloud/web/handler/dto"
 	"devcloud/web/handler/reqctx"
 	"devcloud/web/handler/response"
+	"devcloud/web/service"
 	"strconv"
 
 	"github.com/labstack/echo/v5"
@@ -45,7 +46,7 @@ func (r *Resource) List(c *echo.Context) error {
 			ID:       r.ID,
 			Name:     r.Name,
 			Type:     r.Type,
-			Provider: r.Provider,
+			Provider: r.Provider.String(),
 			Status:   r.Status.String(),
 		}
 	}
@@ -72,7 +73,7 @@ func (r *Resource) Get(c *echo.Context) error {
 		ID:       rc.ID,
 		Name:     rc.Name,
 		Type:     rc.Type,
-		Provider: rc.Provider,
+		Provider: rc.Provider.String(),
 		Status:   rc.Status.String(),
 	})
 }
@@ -95,7 +96,7 @@ func (r *Resource) Create(c *echo.Context) error {
 		c.Request().Context(),
 		user.ID,
 		req.Name,
-		req.Provider,
+		resource.Provider(req.Provider),
 		req.Config,
 	)
 	if err != nil {
@@ -107,7 +108,7 @@ func (r *Resource) Create(c *echo.Context) error {
 			ID:       rc.ID,
 			Name:     rc.Name,
 			Type:     rc.Type,
-			Provider: rc.Provider,
+			Provider: rc.Provider.String(),
 			Status:   rc.Status.String(),
 		},
 		TaskID: t.ID,

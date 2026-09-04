@@ -30,6 +30,8 @@ type Task struct {
 	Attempts int `json:"attempts,omitempty"`
 	// MaxAttempts holds the value of the "max_attempts" field.
 	MaxAttempts int `json:"max_attempts,omitempty"`
+	// NextRunAt holds the value of the "next_run_at" field.
+	NextRunAt time.Time `json:"next_run_at,omitempty"`
 	// Payload holds the value of the "payload" field.
 	Payload map[string]interface{} `json:"payload,omitempty"`
 	// ErrorMessage holds the value of the "error_message" field.
@@ -56,7 +58,7 @@ func (*Task) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case task.FieldType, task.FieldStatus, task.FieldErrorMessage:
 			values[i] = new(sql.NullString)
-		case task.FieldStartedAt, task.FieldFinishedAt, task.FieldCreatedAt, task.FieldUpdatedAt:
+		case task.FieldNextRunAt, task.FieldStartedAt, task.FieldFinishedAt, task.FieldCreatedAt, task.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -114,6 +116,12 @@ func (_m *Task) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field max_attempts", values[i])
 			} else if value.Valid {
 				_m.MaxAttempts = int(value.Int64)
+			}
+		case task.FieldNextRunAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field next_run_at", values[i])
+			} else if value.Valid {
+				_m.NextRunAt = value.Time
 			}
 		case task.FieldPayload:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -208,6 +216,9 @@ func (_m *Task) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("max_attempts=")
 	builder.WriteString(fmt.Sprintf("%v", _m.MaxAttempts))
+	builder.WriteString(", ")
+	builder.WriteString("next_run_at=")
+	builder.WriteString(_m.NextRunAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("payload=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Payload))

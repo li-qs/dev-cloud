@@ -1,9 +1,10 @@
-package repo
+package repos
 
 import (
 	"context"
 	"devcloud/ent"
 	"devcloud/ent/task"
+	"time"
 )
 
 type Task struct {
@@ -39,4 +40,15 @@ func (t *Task) Create(
 		SetStatus(task.StatusPENDING).
 		SetPayload(payload).
 		Save(ctx)
+}
+
+func (t *Task) Claim(ctx context.Context) (*ent.Task, error) {
+	return t.task.
+		Query().
+		Where(
+			task.StatusEQ(task.StatusPENDING),
+			task.NextRunAtLTE(time.Now()),
+		).
+		Order(ent.Asc(task.FieldNextRunAt)).
+		Only(ctx)
 }

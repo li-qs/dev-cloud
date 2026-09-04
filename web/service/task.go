@@ -7,13 +7,13 @@ import (
 )
 
 type Task struct {
-	taskRepo *repo.Task
+	repo *repo.Repo
 }
 
-func NewTask(taskRepo *repo.Task) *Task {
-	return &Task{taskRepo: taskRepo}
+func NewTask(repo *repo.Repo) *Task {
+	return &Task{repo: repo}
 }
 
 func (t *Task) GetTask(ctx context.Context, userID, id int) (*ent.Task, error) {
-	return t.taskRepo.Get(ctx, userID, id)
+	return t.repo.Task.Get(ctx, userID, id)
 }

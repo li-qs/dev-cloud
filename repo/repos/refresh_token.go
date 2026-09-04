@@ -1,4 +1,4 @@
-package repo
+package repos
 
 import (
 	"context"
@@ -15,7 +15,7 @@ func NewToken(db *ent.Client) *RefreshToken {
 	return &RefreshToken{token: db.RefreshToken}
 }
 
-func (r *RefreshToken) GetByToken(ctx context.Context, tokenHash string) (*ent.RefreshToken, error) {
+func (r *RefreshToken) Get(ctx context.Context, tokenHash string) (*ent.RefreshToken, error) {
 	return r.token.
 		Query().
 		Where(refreshtoken.TokenHash(tokenHash)).

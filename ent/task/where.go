@@ -74,6 +74,11 @@ func MaxAttempts(v int) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldMaxAttempts, v))
 }
 
+// NextRunAt applies equality check predicate on the "next_run_at" field. It's identical to NextRunAtEQ.
+func NextRunAt(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldNextRunAt, v))
+}
+
 // ErrorMessage applies equality check predicate on the "error_message" field. It's identical to ErrorMessageEQ.
 func ErrorMessage(v string) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldErrorMessage, v))
@@ -297,6 +302,56 @@ func MaxAttemptsLT(v int) predicate.Task {
 // MaxAttemptsLTE applies the LTE predicate on the "max_attempts" field.
 func MaxAttemptsLTE(v int) predicate.Task {
 	return predicate.Task(sql.FieldLTE(FieldMaxAttempts, v))
+}
+
+// NextRunAtEQ applies the EQ predicate on the "next_run_at" field.
+func NextRunAtEQ(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldNextRunAt, v))
+}
+
+// NextRunAtNEQ applies the NEQ predicate on the "next_run_at" field.
+func NextRunAtNEQ(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldNEQ(FieldNextRunAt, v))
+}
+
+// NextRunAtIn applies the In predicate on the "next_run_at" field.
+func NextRunAtIn(vs ...time.Time) predicate.Task {
+	return predicate.Task(sql.FieldIn(FieldNextRunAt, vs...))
+}
+
+// NextRunAtNotIn applies the NotIn predicate on the "next_run_at" field.
+func NextRunAtNotIn(vs ...time.Time) predicate.Task {
+	return predicate.Task(sql.FieldNotIn(FieldNextRunAt, vs...))
+}
+
+// NextRunAtGT applies the GT predicate on the "next_run_at" field.
+func NextRunAtGT(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldGT(FieldNextRunAt, v))
+}
+
+// NextRunAtGTE applies the GTE predicate on the "next_run_at" field.
+func NextRunAtGTE(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldGTE(FieldNextRunAt, v))
+}
+
+// NextRunAtLT applies the LT predicate on the "next_run_at" field.
+func NextRunAtLT(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldLT(FieldNextRunAt, v))
+}
+
+// NextRunAtLTE applies the LTE predicate on the "next_run_at" field.
+func NextRunAtLTE(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldLTE(FieldNextRunAt, v))
+}
+
+// NextRunAtIsNil applies the IsNil predicate on the "next_run_at" field.
+func NextRunAtIsNil() predicate.Task {
+	return predicate.Task(sql.FieldIsNull(FieldNextRunAt))
+}
+
+// NextRunAtNotNil applies the NotNil predicate on the "next_run_at" field.
+func NextRunAtNotNil() predicate.Task {
+	return predicate.Task(sql.FieldNotNull(FieldNextRunAt))
 }
 
 // PayloadIsNil applies the IsNil predicate on the "payload" field.

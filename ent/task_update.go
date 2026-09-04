@@ -140,6 +140,26 @@ func (_u *TaskUpdate) AddMaxAttempts(v int) *TaskUpdate {
 	return _u
 }
 
+// SetNextRunAt sets the "next_run_at" field.
+func (_u *TaskUpdate) SetNextRunAt(v time.Time) *TaskUpdate {
+	_u.mutation.SetNextRunAt(v)
+	return _u
+}
+
+// SetNillableNextRunAt sets the "next_run_at" field if the given value is not nil.
+func (_u *TaskUpdate) SetNillableNextRunAt(v *time.Time) *TaskUpdate {
+	if v != nil {
+		_u.SetNextRunAt(*v)
+	}
+	return _u
+}
+
+// ClearNextRunAt clears the value of the "next_run_at" field.
+func (_u *TaskUpdate) ClearNextRunAt() *TaskUpdate {
+	_u.mutation.ClearNextRunAt()
+	return _u
+}
+
 // SetPayload sets the "payload" field.
 func (_u *TaskUpdate) SetPayload(v map[string]interface{}) *TaskUpdate {
 	_u.mutation.SetPayload(v)
@@ -330,6 +350,12 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.AddedMaxAttempts(); ok {
 		_spec.AddField(task.FieldMaxAttempts, field.TypeInt, value)
 	}
+	if value, ok := _u.mutation.NextRunAt(); ok {
+		_spec.SetField(task.FieldNextRunAt, field.TypeTime, value)
+	}
+	if _u.mutation.NextRunAtCleared() {
+		_spec.ClearField(task.FieldNextRunAt, field.TypeTime)
+	}
 	if value, ok := _u.mutation.Payload(); ok {
 		_spec.SetField(task.FieldPayload, field.TypeJSON, value)
 	}
@@ -489,6 +515,26 @@ func (_u *TaskUpdateOne) SetNillableMaxAttempts(v *int) *TaskUpdateOne {
 // AddMaxAttempts adds value to the "max_attempts" field.
 func (_u *TaskUpdateOne) AddMaxAttempts(v int) *TaskUpdateOne {
 	_u.mutation.AddMaxAttempts(v)
+	return _u
+}
+
+// SetNextRunAt sets the "next_run_at" field.
+func (_u *TaskUpdateOne) SetNextRunAt(v time.Time) *TaskUpdateOne {
+	_u.mutation.SetNextRunAt(v)
+	return _u
+}
+
+// SetNillableNextRunAt sets the "next_run_at" field if the given value is not nil.
+func (_u *TaskUpdateOne) SetNillableNextRunAt(v *time.Time) *TaskUpdateOne {
+	if v != nil {
+		_u.SetNextRunAt(*v)
+	}
+	return _u
+}
+
+// ClearNextRunAt clears the value of the "next_run_at" field.
+func (_u *TaskUpdateOne) ClearNextRunAt() *TaskUpdateOne {
+	_u.mutation.ClearNextRunAt()
 	return _u
 }
 
@@ -711,6 +757,12 @@ func (_u *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 	}
 	if value, ok := _u.mutation.AddedMaxAttempts(); ok {
 		_spec.AddField(task.FieldMaxAttempts, field.TypeInt, value)
+	}
+	if value, ok := _u.mutation.NextRunAt(); ok {
+		_spec.SetField(task.FieldNextRunAt, field.TypeTime, value)
+	}
+	if _u.mutation.NextRunAtCleared() {
+		_spec.ClearField(task.FieldNextRunAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.Payload(); ok {
 		_spec.SetField(task.FieldPayload, field.TypeJSON, value)

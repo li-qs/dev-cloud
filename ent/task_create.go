@@ -80,6 +80,20 @@ func (_c *TaskCreate) SetNillableMaxAttempts(v *int) *TaskCreate {
 	return _c
 }
 
+// SetNextRunAt sets the "next_run_at" field.
+func (_c *TaskCreate) SetNextRunAt(v time.Time) *TaskCreate {
+	_c.mutation.SetNextRunAt(v)
+	return _c
+}
+
+// SetNillableNextRunAt sets the "next_run_at" field if the given value is not nil.
+func (_c *TaskCreate) SetNillableNextRunAt(v *time.Time) *TaskCreate {
+	if v != nil {
+		_c.SetNextRunAt(*v)
+	}
+	return _c
+}
+
 // SetPayload sets the "payload" field.
 func (_c *TaskCreate) SetPayload(v map[string]interface{}) *TaskCreate {
 	_c.mutation.SetPayload(v)
@@ -298,6 +312,10 @@ func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.MaxAttempts(); ok {
 		_spec.SetField(task.FieldMaxAttempts, field.TypeInt, value)
 		_node.MaxAttempts = value
+	}
+	if value, ok := _c.mutation.NextRunAt(); ok {
+		_spec.SetField(task.FieldNextRunAt, field.TypeTime, value)
+		_node.NextRunAt = value
 	}
 	if value, ok := _c.mutation.Payload(); ok {
 		_spec.SetField(task.FieldPayload, field.TypeJSON, value)

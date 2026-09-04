@@ -26,9 +26,12 @@ func (Resource) Fields() []ent.Field {
 		field.String("type").
 			MaxLen(32),
 
-		field.String("provider").
-			MaxLen(32).
+		field.Enum("provider").
+			Values("docker").
 			Default("docker"),
+
+		field.String("runtime_id").
+			Optional(),
 
 		field.Enum("status").
 			Values(

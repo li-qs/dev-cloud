@@ -39,15 +39,29 @@ func (_c *ResourceCreate) SetType(v string) *ResourceCreate {
 }
 
 // SetProvider sets the "provider" field.
-func (_c *ResourceCreate) SetProvider(v string) *ResourceCreate {
+func (_c *ResourceCreate) SetProvider(v resource.Provider) *ResourceCreate {
 	_c.mutation.SetProvider(v)
 	return _c
 }
 
 // SetNillableProvider sets the "provider" field if the given value is not nil.
-func (_c *ResourceCreate) SetNillableProvider(v *string) *ResourceCreate {
+func (_c *ResourceCreate) SetNillableProvider(v *resource.Provider) *ResourceCreate {
 	if v != nil {
 		_c.SetProvider(*v)
+	}
+	return _c
+}
+
+// SetRuntimeID sets the "runtime_id" field.
+func (_c *ResourceCreate) SetRuntimeID(v string) *ResourceCreate {
+	_c.mutation.SetRuntimeID(v)
+	return _c
+}
+
+// SetNillableRuntimeID sets the "runtime_id" field if the given value is not nil.
+func (_c *ResourceCreate) SetNillableRuntimeID(v *string) *ResourceCreate {
+	if v != nil {
+		_c.SetRuntimeID(*v)
 	}
 	return _c
 }
@@ -277,8 +291,12 @@ func (_c *ResourceCreate) createSpec() (*Resource, *sqlgraph.CreateSpec) {
 		_node.Type = value
 	}
 	if value, ok := _c.mutation.Provider(); ok {
-		_spec.SetField(resource.FieldProvider, field.TypeString, value)
+		_spec.SetField(resource.FieldProvider, field.TypeEnum, value)
 		_node.Provider = value
+	}
+	if value, ok := _c.mutation.RuntimeID(); ok {
+		_spec.SetField(resource.FieldRuntimeID, field.TypeString, value)
+		_node.RuntimeID = value
 	}
 	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(resource.FieldStatus, field.TypeEnum, value)

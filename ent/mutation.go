@@ -643,7 +643,8 @@ type ResourceMutation struct {
 	adduser_id    *int
 	name          *string
 	_type         *string
-	provider      *string
+	provider      *resource.Provider
+	runtime_id    *string
 	status        *resource.Status
 	_config       *map[string]interface{}
 	credential    *string
@@ -884,12 +885,12 @@ func (m *ResourceMutation) ResetType() {
 }
 
 // SetProvider sets the "provider" field.
-func (m *ResourceMutation) SetProvider(s string) {
-	m.provider = &s
+func (m *ResourceMutation) SetProvider(r resource.Provider) {
+	m.provider = &r
 }
 
 // Provider returns the value of the "provider" field in the mutation.
-func (m *ResourceMutation) Provider() (r string, exists bool) {
+func (m *ResourceMutation) Provider() (r resource.Provider, exists bool) {
 	v := m.provider
 	if v == nil {
 		return
@@ -900,7 +901,7 @@ func (m *ResourceMutation) Provider() (r string, exists bool) {
 // OldProvider returns the old "provider" field's value of the Resource entity.
 // If the Resource object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceMutation) OldProvider(ctx context.Context) (v string, err error) {
+func (m *ResourceMutation) OldProvider(ctx context.Context) (v resource.Provider, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldProvider is only allowed on UpdateOne operations")
 	}
@@ -917,6 +918,55 @@ func (m *ResourceMutation) OldProvider(ctx context.Context) (v string, err error
 // ResetProvider resets all changes to the "provider" field.
 func (m *ResourceMutation) ResetProvider() {
 	m.provider = nil
+}
+
+// SetRuntimeID sets the "runtime_id" field.
+func (m *ResourceMutation) SetRuntimeID(s string) {
+	m.runtime_id = &s
+}
+
+// RuntimeID returns the value of the "runtime_id" field in the mutation.
+func (m *ResourceMutation) RuntimeID() (r string, exists bool) {
+	v := m.runtime_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRuntimeID returns the old "runtime_id" field's value of the Resource entity.
+// If the Resource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourceMutation) OldRuntimeID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRuntimeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRuntimeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRuntimeID: %w", err)
+	}
+	return oldValue.RuntimeID, nil
+}
+
+// ClearRuntimeID clears the value of the "runtime_id" field.
+func (m *ResourceMutation) ClearRuntimeID() {
+	m.runtime_id = nil
+	m.clearedFields[resource.FieldRuntimeID] = struct{}{}
+}
+
+// RuntimeIDCleared returns if the "runtime_id" field was cleared in this mutation.
+func (m *ResourceMutation) RuntimeIDCleared() bool {
+	_, ok := m.clearedFields[resource.FieldRuntimeID]
+	return ok
+}
+
+// ResetRuntimeID resets all changes to the "runtime_id" field.
+func (m *ResourceMutation) ResetRuntimeID() {
+	m.runtime_id = nil
+	delete(m.clearedFields, resource.FieldRuntimeID)
 }
 
 // SetStatus sets the "status" field.
@@ -1257,7 +1307,7 @@ func (m *ResourceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResourceMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.user_id != nil {
 		fields = append(fields, resource.FieldUserID)
 	}
@@ -1269,6 +1319,9 @@ func (m *ResourceMutation) Fields() []string {
 	}
 	if m.provider != nil {
 		fields = append(fields, resource.FieldProvider)
+	}
+	if m.runtime_id != nil {
+		fields = append(fields, resource.FieldRuntimeID)
 	}
 	if m.status != nil {
 		fields = append(fields, resource.FieldStatus)
@@ -1307,6 +1360,8 @@ func (m *ResourceMutation) Field(name string) (ent.Value, bool) {
 		return m.GetType()
 	case resource.FieldProvider:
 		return m.Provider()
+	case resource.FieldRuntimeID:
+		return m.RuntimeID()
 	case resource.FieldStatus:
 		return m.Status()
 	case resource.FieldConfig:
@@ -1338,6 +1393,8 @@ func (m *ResourceMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldType(ctx)
 	case resource.FieldProvider:
 		return m.OldProvider(ctx)
+	case resource.FieldRuntimeID:
+		return m.OldRuntimeID(ctx)
 	case resource.FieldStatus:
 		return m.OldStatus(ctx)
 	case resource.FieldConfig:
@@ -1383,11 +1440,18 @@ func (m *ResourceMutation) SetField(name string, value ent.Value) error {
 		m.SetType(v)
 		return nil
 	case resource.FieldProvider:
-		v, ok := value.(string)
+		v, ok := value.(resource.Provider)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetProvider(v)
+		return nil
+	case resource.FieldRuntimeID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRuntimeID(v)
 		return nil
 	case resource.FieldStatus:
 		v, ok := value.(resource.Status)
@@ -1483,6 +1547,9 @@ func (m *ResourceMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *ResourceMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(resource.FieldRuntimeID) {
+		fields = append(fields, resource.FieldRuntimeID)
+	}
 	if m.FieldCleared(resource.FieldConfig) {
 		fields = append(fields, resource.FieldConfig)
 	}
@@ -1509,6 +1576,9 @@ func (m *ResourceMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *ResourceMutation) ClearField(name string) error {
 	switch name {
+	case resource.FieldRuntimeID:
+		m.ClearRuntimeID()
+		return nil
 	case resource.FieldConfig:
 		m.ClearConfig()
 		return nil
@@ -1540,6 +1610,9 @@ func (m *ResourceMutation) ResetField(name string) error {
 		return nil
 	case resource.FieldProvider:
 		m.ResetProvider()
+		return nil
+	case resource.FieldRuntimeID:
+		m.ResetRuntimeID()
 		return nil
 	case resource.FieldStatus:
 		m.ResetStatus()
@@ -1630,6 +1703,7 @@ type TaskMutation struct {
 	addattempts     *int
 	max_attempts    *int
 	addmax_attempts *int
+	next_run_at     *time.Time
 	payload         *map[string]interface{}
 	error_message   *string
 	started_at      *time.Time
@@ -2036,6 +2110,55 @@ func (m *TaskMutation) ResetMaxAttempts() {
 	m.addmax_attempts = nil
 }
 
+// SetNextRunAt sets the "next_run_at" field.
+func (m *TaskMutation) SetNextRunAt(t time.Time) {
+	m.next_run_at = &t
+}
+
+// NextRunAt returns the value of the "next_run_at" field in the mutation.
+func (m *TaskMutation) NextRunAt() (r time.Time, exists bool) {
+	v := m.next_run_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNextRunAt returns the old "next_run_at" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldNextRunAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNextRunAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNextRunAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNextRunAt: %w", err)
+	}
+	return oldValue.NextRunAt, nil
+}
+
+// ClearNextRunAt clears the value of the "next_run_at" field.
+func (m *TaskMutation) ClearNextRunAt() {
+	m.next_run_at = nil
+	m.clearedFields[task.FieldNextRunAt] = struct{}{}
+}
+
+// NextRunAtCleared returns if the "next_run_at" field was cleared in this mutation.
+func (m *TaskMutation) NextRunAtCleared() bool {
+	_, ok := m.clearedFields[task.FieldNextRunAt]
+	return ok
+}
+
+// ResetNextRunAt resets all changes to the "next_run_at" field.
+func (m *TaskMutation) ResetNextRunAt() {
+	m.next_run_at = nil
+	delete(m.clearedFields, task.FieldNextRunAt)
+}
+
 // SetPayload sets the "payload" field.
 func (m *TaskMutation) SetPayload(value map[string]interface{}) {
 	m.payload = &value
@@ -2338,7 +2461,7 @@ func (m *TaskMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TaskMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 13)
 	if m.user_id != nil {
 		fields = append(fields, task.FieldUserID)
 	}
@@ -2356,6 +2479,9 @@ func (m *TaskMutation) Fields() []string {
 	}
 	if m.max_attempts != nil {
 		fields = append(fields, task.FieldMaxAttempts)
+	}
+	if m.next_run_at != nil {
+		fields = append(fields, task.FieldNextRunAt)
 	}
 	if m.payload != nil {
 		fields = append(fields, task.FieldPayload)
@@ -2395,6 +2521,8 @@ func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 		return m.Attempts()
 	case task.FieldMaxAttempts:
 		return m.MaxAttempts()
+	case task.FieldNextRunAt:
+		return m.NextRunAt()
 	case task.FieldPayload:
 		return m.Payload()
 	case task.FieldErrorMessage:
@@ -2428,6 +2556,8 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldAttempts(ctx)
 	case task.FieldMaxAttempts:
 		return m.OldMaxAttempts(ctx)
+	case task.FieldNextRunAt:
+		return m.OldNextRunAt(ctx)
 	case task.FieldPayload:
 		return m.OldPayload(ctx)
 	case task.FieldErrorMessage:
@@ -2490,6 +2620,13 @@ func (m *TaskMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetMaxAttempts(v)
+		return nil
+	case task.FieldNextRunAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNextRunAt(v)
 		return nil
 	case task.FieldPayload:
 		v, ok := value.(map[string]interface{})
@@ -2614,6 +2751,9 @@ func (m *TaskMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *TaskMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(task.FieldNextRunAt) {
+		fields = append(fields, task.FieldNextRunAt)
+	}
 	if m.FieldCleared(task.FieldPayload) {
 		fields = append(fields, task.FieldPayload)
 	}
@@ -2640,6 +2780,9 @@ func (m *TaskMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *TaskMutation) ClearField(name string) error {
 	switch name {
+	case task.FieldNextRunAt:
+		m.ClearNextRunAt()
+		return nil
 	case task.FieldPayload:
 		m.ClearPayload()
 		return nil
@@ -2677,6 +2820,9 @@ func (m *TaskMutation) ResetField(name string) error {
 		return nil
 	case task.FieldMaxAttempts:
 		m.ResetMaxAttempts()
+		return nil
+	case task.FieldNextRunAt:
+		m.ResetNextRunAt()
 		return nil
 	case task.FieldPayload:
 		m.ResetPayload()

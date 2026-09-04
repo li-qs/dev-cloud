@@ -46,6 +46,9 @@ func (Task) Fields() []ent.Field {
 		field.Int("max_attempts").
 			Default(3),
 
+		field.Time("next_run_at").
+			Optional(),
+
 		field.JSON("payload", map[string]any{}).
 			Optional(),
 

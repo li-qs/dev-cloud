@@ -9,10 +9,15 @@ import (
 	"os/signal"
 	"syscall"
 
-	"devcloud/app"
 	"devcloud/config"
+	"devcloud/ent/resource"
+	"devcloud/provider"
+	"devcloud/provider/docker"
+	"devcloud/repo"
 	"devcloud/storage"
+	"devcloud/store"
 	"devcloud/web"
+	"devcloud/worker"
 
 	"github.com/labstack/echo/v5"
 	_ "github.com/lib/pq"
@@ -36,17 +41,16 @@ func run() error {
 		slog.New(slog.NewJSONHandler(os.Stdout, slogOpts)),
 	)
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
 	var configFile string
 	flag.StringVar(&configFile, "config", "./config.yaml", "config file path")
 	flag.Parse()
-
 	var cfg config.Config
 	if err := config.LoadFile(configFile, &cfg); err != nil {
 		return fmt.Errorf("load config: %w", err)
 	}
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	psql, err := storage.NewPostgres(&cfg)
 	if err != nil {
@@ -64,22 +68,34 @@ func run() error {
 	}
 	defer rdb.Close()
 
-	app := app.New(&cfg, psql, rdb)
+	repo := repo.New(psql)
+	store := store.New(rdb)
 
-	webServer := web.NewServer(app, *cfg.CookieSecure, cfg.JWTSecret)
-	webErr := make(chan error, 1)
+	runErr := make(chan error, 1)
+
+	webServer := web.NewServer(&cfg, repo, store)
 	go func() {
 		sc := echo.StartConfig{
 			Address:    cfg.ServerAddr,
 			HideBanner: true,
 		}
-		webErr <- sc.Start(ctx, webServer)
+		runErr <- sc.Start(ctx, webServer)
 	}()
+
+	registry := provider.NewRegistry()
+	registry.Register(
+		resource.ProviderDocker,
+		docker.NewProvider(),
+	)
+
+	workerPool := worker.NewPool(ctx, 4, repo, registry)
+	go workerPool.Start()
+	defer workerPool.Stop()
 
 	select {
 	case <-ctx.Done():
 		slog.Info("shutdown", "cause", ctx.Err())
-	case err := <-webErr:
+	case err := <-runErr:
 		if err != nil {
 			return fmt.Errorf("web server: %w", err)
 		}

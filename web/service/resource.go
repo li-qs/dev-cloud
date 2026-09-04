@@ -9,28 +9,21 @@ import (
 )
 
 type Resource struct {
-	resourceRepo *repo.Resource
-	taskRepo     *repo.Task
+	repo *repo.Repo
 }
 
-func NewResource(
-	resourceRepo *repo.Resource,
-	taskRepo *repo.Task,
-) *Resource {
-	return &Resource{
-		resourceRepo: resourceRepo,
-		taskRepo:     taskRepo,
-	}
+func NewResource(repo *repo.Repo) *Resource {
+	return &Resource{repo: repo}
 }
 
 func (r *Resource) List(ctx context.Context, userID, page, pageSize int) ([]*ent.Resource, int, error) {
 	offset := (page - 1) * pageSize
-	resources, err := r.resourceRepo.List(ctx, userID, offset, pageSize)
+	resources, err := r.repo.Resource.List(ctx, userID, offset, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	count, err := r.resourceRepo.Count(ctx, userID)
+	count, err := r.repo.Resource.Count(ctx, userID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -39,7 +32,7 @@ func (r *Resource) List(ctx context.Context, userID, page, pageSize int) ([]*ent
 }
 
 func (r *Resource) Get(ctx context.Context, userID, id int) (*ent.Resource, error) {
-	rc, err := r.resourceRepo.Get(ctx, userID, id)
+	rc, err := r.repo.Resource.GetByUser(ctx, userID, id)
 	if err != nil {
 		return nil, err
 	}
@@ -51,16 +44,15 @@ func (r *Resource) Create(
 	ctx context.Context,
 	userID int,
 	name string,
-	provider string,
+	provider resource.Provider,
 	config map[string]any,
 ) (*ent.Resource, *ent.Task, error) {
-	rc, err := r.resourceRepo.Create(
+	rc, err := r.repo.Resource.Create(
 		ctx,
 		userID,
 		name,
 		provider,
 		config,
-		"",
 	)
 	if err != nil {
 		return nil, nil, err
@@ -71,7 +63,7 @@ func (r *Resource) Create(
 	payload["provider"] = provider
 	payload["config"] = config
 
-	t, err := r.taskRepo.Create(
+	t, err := r.repo.Task.Create(
 		ctx,
 		userID,
 		rc.ID,
@@ -85,17 +77,17 @@ func (r *Resource) Create(
 }
 
 func (r *Resource) Delete(ctx context.Context, userID, id int) error {
-	return r.resourceRepo.Delete(ctx, userID, id)
+	return r.repo.Resource.DeleteByUser(ctx, userID, id)
 }
 
 func (r *Resource) Start(ctx context.Context, userID, id int) error {
-	return r.resourceRepo.ResetStatus(ctx, userID, id, resource.StatusSTARTING)
+	return r.repo.Resource.SetStatusByUser(ctx, userID, id, resource.StatusSTARTING)
 }
 
 func (r *Resource) Stop(ctx context.Context, userID, id int) error {
-	return r.resourceRepo.ResetStatus(ctx, userID, id, resource.StatusSTOPPING)
+	return r.repo.Resource.SetStatusByUser(ctx, userID, id, resource.StatusSTOPPING)
 }
 
 func (r *Resource) Restart(ctx context.Context, userID, id int) error {
-	return r.resourceRepo.ResetStatus(ctx, userID, id, resource.StatusRESTARTING)
+	return r.repo.Resource.SetStatusByUser(ctx, userID, id, resource.StatusRESTARTING)
 }

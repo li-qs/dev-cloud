@@ -78,16 +78,36 @@ func (_u *ResourceUpdate) SetNillableType(v *string) *ResourceUpdate {
 }
 
 // SetProvider sets the "provider" field.
-func (_u *ResourceUpdate) SetProvider(v string) *ResourceUpdate {
+func (_u *ResourceUpdate) SetProvider(v resource.Provider) *ResourceUpdate {
 	_u.mutation.SetProvider(v)
 	return _u
 }
 
 // SetNillableProvider sets the "provider" field if the given value is not nil.
-func (_u *ResourceUpdate) SetNillableProvider(v *string) *ResourceUpdate {
+func (_u *ResourceUpdate) SetNillableProvider(v *resource.Provider) *ResourceUpdate {
 	if v != nil {
 		_u.SetProvider(*v)
 	}
+	return _u
+}
+
+// SetRuntimeID sets the "runtime_id" field.
+func (_u *ResourceUpdate) SetRuntimeID(v string) *ResourceUpdate {
+	_u.mutation.SetRuntimeID(v)
+	return _u
+}
+
+// SetNillableRuntimeID sets the "runtime_id" field if the given value is not nil.
+func (_u *ResourceUpdate) SetNillableRuntimeID(v *string) *ResourceUpdate {
+	if v != nil {
+		_u.SetRuntimeID(*v)
+	}
+	return _u
+}
+
+// ClearRuntimeID clears the value of the "runtime_id" field.
+func (_u *ResourceUpdate) ClearRuntimeID() *ResourceUpdate {
+	_u.mutation.ClearRuntimeID()
 	return _u
 }
 
@@ -288,7 +308,13 @@ func (_u *ResourceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 		_spec.SetField(resource.FieldType, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Provider(); ok {
-		_spec.SetField(resource.FieldProvider, field.TypeString, value)
+		_spec.SetField(resource.FieldProvider, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.RuntimeID(); ok {
+		_spec.SetField(resource.FieldRuntimeID, field.TypeString, value)
+	}
+	if _u.mutation.RuntimeIDCleared() {
+		_spec.ClearField(resource.FieldRuntimeID, field.TypeString)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(resource.FieldStatus, field.TypeEnum, value)
@@ -393,16 +419,36 @@ func (_u *ResourceUpdateOne) SetNillableType(v *string) *ResourceUpdateOne {
 }
 
 // SetProvider sets the "provider" field.
-func (_u *ResourceUpdateOne) SetProvider(v string) *ResourceUpdateOne {
+func (_u *ResourceUpdateOne) SetProvider(v resource.Provider) *ResourceUpdateOne {
 	_u.mutation.SetProvider(v)
 	return _u
 }
 
 // SetNillableProvider sets the "provider" field if the given value is not nil.
-func (_u *ResourceUpdateOne) SetNillableProvider(v *string) *ResourceUpdateOne {
+func (_u *ResourceUpdateOne) SetNillableProvider(v *resource.Provider) *ResourceUpdateOne {
 	if v != nil {
 		_u.SetProvider(*v)
 	}
+	return _u
+}
+
+// SetRuntimeID sets the "runtime_id" field.
+func (_u *ResourceUpdateOne) SetRuntimeID(v string) *ResourceUpdateOne {
+	_u.mutation.SetRuntimeID(v)
+	return _u
+}
+
+// SetNillableRuntimeID sets the "runtime_id" field if the given value is not nil.
+func (_u *ResourceUpdateOne) SetNillableRuntimeID(v *string) *ResourceUpdateOne {
+	if v != nil {
+		_u.SetRuntimeID(*v)
+	}
+	return _u
+}
+
+// ClearRuntimeID clears the value of the "runtime_id" field.
+func (_u *ResourceUpdateOne) ClearRuntimeID() *ResourceUpdateOne {
+	_u.mutation.ClearRuntimeID()
 	return _u
 }
 
@@ -633,7 +679,13 @@ func (_u *ResourceUpdateOne) sqlSave(ctx context.Context) (_node *Resource, err 
 		_spec.SetField(resource.FieldType, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.Provider(); ok {
-		_spec.SetField(resource.FieldProvider, field.TypeString, value)
+		_spec.SetField(resource.FieldProvider, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.RuntimeID(); ok {
+		_spec.SetField(resource.FieldRuntimeID, field.TypeString, value)
+	}
+	if _u.mutation.RuntimeIDCleared() {
+		_spec.ClearField(resource.FieldRuntimeID, field.TypeString)
 	}
 	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(resource.FieldStatus, field.TypeEnum, value)

@@ -69,9 +69,9 @@ func Type(v string) predicate.Resource {
 	return predicate.Resource(sql.FieldEQ(FieldType, v))
 }
 
-// Provider applies equality check predicate on the "provider" field. It's identical to ProviderEQ.
-func Provider(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldEQ(FieldProvider, v))
+// RuntimeID applies equality check predicate on the "runtime_id" field. It's identical to RuntimeIDEQ.
+func RuntimeID(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldEQ(FieldRuntimeID, v))
 }
 
 // Credential applies equality check predicate on the "credential" field. It's identical to CredentialEQ.
@@ -270,68 +270,98 @@ func TypeContainsFold(v string) predicate.Resource {
 }
 
 // ProviderEQ applies the EQ predicate on the "provider" field.
-func ProviderEQ(v string) predicate.Resource {
+func ProviderEQ(v Provider) predicate.Resource {
 	return predicate.Resource(sql.FieldEQ(FieldProvider, v))
 }
 
 // ProviderNEQ applies the NEQ predicate on the "provider" field.
-func ProviderNEQ(v string) predicate.Resource {
+func ProviderNEQ(v Provider) predicate.Resource {
 	return predicate.Resource(sql.FieldNEQ(FieldProvider, v))
 }
 
 // ProviderIn applies the In predicate on the "provider" field.
-func ProviderIn(vs ...string) predicate.Resource {
+func ProviderIn(vs ...Provider) predicate.Resource {
 	return predicate.Resource(sql.FieldIn(FieldProvider, vs...))
 }
 
 // ProviderNotIn applies the NotIn predicate on the "provider" field.
-func ProviderNotIn(vs ...string) predicate.Resource {
+func ProviderNotIn(vs ...Provider) predicate.Resource {
 	return predicate.Resource(sql.FieldNotIn(FieldProvider, vs...))
 }
 
-// ProviderGT applies the GT predicate on the "provider" field.
-func ProviderGT(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldGT(FieldProvider, v))
+// RuntimeIDEQ applies the EQ predicate on the "runtime_id" field.
+func RuntimeIDEQ(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldEQ(FieldRuntimeID, v))
 }
 
-// ProviderGTE applies the GTE predicate on the "provider" field.
-func ProviderGTE(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldGTE(FieldProvider, v))
+// RuntimeIDNEQ applies the NEQ predicate on the "runtime_id" field.
+func RuntimeIDNEQ(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldNEQ(FieldRuntimeID, v))
 }
 
-// ProviderLT applies the LT predicate on the "provider" field.
-func ProviderLT(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldLT(FieldProvider, v))
+// RuntimeIDIn applies the In predicate on the "runtime_id" field.
+func RuntimeIDIn(vs ...string) predicate.Resource {
+	return predicate.Resource(sql.FieldIn(FieldRuntimeID, vs...))
 }
 
-// ProviderLTE applies the LTE predicate on the "provider" field.
-func ProviderLTE(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldLTE(FieldProvider, v))
+// RuntimeIDNotIn applies the NotIn predicate on the "runtime_id" field.
+func RuntimeIDNotIn(vs ...string) predicate.Resource {
+	return predicate.Resource(sql.FieldNotIn(FieldRuntimeID, vs...))
 }
 
-// ProviderContains applies the Contains predicate on the "provider" field.
-func ProviderContains(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldContains(FieldProvider, v))
+// RuntimeIDGT applies the GT predicate on the "runtime_id" field.
+func RuntimeIDGT(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldGT(FieldRuntimeID, v))
 }
 
-// ProviderHasPrefix applies the HasPrefix predicate on the "provider" field.
-func ProviderHasPrefix(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldHasPrefix(FieldProvider, v))
+// RuntimeIDGTE applies the GTE predicate on the "runtime_id" field.
+func RuntimeIDGTE(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldGTE(FieldRuntimeID, v))
 }
 
-// ProviderHasSuffix applies the HasSuffix predicate on the "provider" field.
-func ProviderHasSuffix(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldHasSuffix(FieldProvider, v))
+// RuntimeIDLT applies the LT predicate on the "runtime_id" field.
+func RuntimeIDLT(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldLT(FieldRuntimeID, v))
 }
 
-// ProviderEqualFold applies the EqualFold predicate on the "provider" field.
-func ProviderEqualFold(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldEqualFold(FieldProvider, v))
+// RuntimeIDLTE applies the LTE predicate on the "runtime_id" field.
+func RuntimeIDLTE(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldLTE(FieldRuntimeID, v))
 }
 
-// ProviderContainsFold applies the ContainsFold predicate on the "provider" field.
-func ProviderContainsFold(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldContainsFold(FieldProvider, v))
+// RuntimeIDContains applies the Contains predicate on the "runtime_id" field.
+func RuntimeIDContains(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldContains(FieldRuntimeID, v))
+}
+
+// RuntimeIDHasPrefix applies the HasPrefix predicate on the "runtime_id" field.
+func RuntimeIDHasPrefix(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldHasPrefix(FieldRuntimeID, v))
+}
+
+// RuntimeIDHasSuffix applies the HasSuffix predicate on the "runtime_id" field.
+func RuntimeIDHasSuffix(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldHasSuffix(FieldRuntimeID, v))
+}
+
+// RuntimeIDIsNil applies the IsNil predicate on the "runtime_id" field.
+func RuntimeIDIsNil() predicate.Resource {
+	return predicate.Resource(sql.FieldIsNull(FieldRuntimeID))
+}
+
+// RuntimeIDNotNil applies the NotNil predicate on the "runtime_id" field.
+func RuntimeIDNotNil() predicate.Resource {
+	return predicate.Resource(sql.FieldNotNull(FieldRuntimeID))
+}
+
+// RuntimeIDEqualFold applies the EqualFold predicate on the "runtime_id" field.
+func RuntimeIDEqualFold(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldEqualFold(FieldRuntimeID, v))
+}
+
+// RuntimeIDContainsFold applies the ContainsFold predicate on the "runtime_id" field.
+func RuntimeIDContainsFold(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldContainsFold(FieldRuntimeID, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

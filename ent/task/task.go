@@ -26,6 +26,8 @@ const (
 	FieldAttempts = "attempts"
 	// FieldMaxAttempts holds the string denoting the max_attempts field in the database.
 	FieldMaxAttempts = "max_attempts"
+	// FieldNextRunAt holds the string denoting the next_run_at field in the database.
+	FieldNextRunAt = "next_run_at"
 	// FieldPayload holds the string denoting the payload field in the database.
 	FieldPayload = "payload"
 	// FieldErrorMessage holds the string denoting the error_message field in the database.
@@ -51,6 +53,7 @@ var Columns = []string{
 	FieldStatus,
 	FieldAttempts,
 	FieldMaxAttempts,
+	FieldNextRunAt,
 	FieldPayload,
 	FieldErrorMessage,
 	FieldStartedAt,
@@ -172,6 +175,11 @@ func ByAttempts(opts ...sql.OrderTermOption) OrderOption {
 // ByMaxAttempts orders the results by the max_attempts field.
 func ByMaxAttempts(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMaxAttempts, opts...).ToFunc()
+}
+
+// ByNextRunAt orders the results by the next_run_at field.
+func ByNextRunAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNextRunAt, opts...).ToFunc()
 }
 
 // ByErrorMessage orders the results by the error_message field.
