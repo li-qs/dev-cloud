@@ -121,3 +121,18 @@ func (t *Task) Claim(ctx context.Context) (*ClaimTaskResult, error) {
 		Type:       _type,
 	}, nil
 }
+
+func (t *Task) SetSuccess(ctx context.Context, id int) error {
+	return t.task.
+		UpdateOneID(id).
+		SetStatus(task.StatusSUCCESS).
+		Exec(ctx)
+}
+
+func (t *Task) SetFailed(ctx context.Context, id int, errMsg string) error {
+	return t.task.
+		UpdateOneID(id).
+		SetStatus(task.StatusFAILED).
+		SetErrorMessage(errMsg).
+		Exec(ctx)
+}

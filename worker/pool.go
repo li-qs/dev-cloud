@@ -17,7 +17,7 @@ type Pool struct {
 	workers int
 
 	executor    *Executor
-	taskFetcher *TaskFetcher
+	taskManager *TaskManager
 }
 
 func NewPool(
@@ -36,8 +36,8 @@ func NewPool(
 		ctx:         ctx,
 		cancel:      cancel,
 		workers:     workers,
-		taskFetcher: NewTaskFetcher(repo),
-		executor:    NewExecutor(repo, registry),
+		taskManager: newTaskManager(repo),
+		executor:    newExecutor(repo, registry),
 	}
 }
 
@@ -45,7 +45,7 @@ func (p *Pool) Start() {
 	for range p.workers {
 		p.wg.Go(func() {
 			newWorker(
-				p.taskFetcher,
+				p.taskManager,
 				p.executor,
 			).run(p.ctx)
 		})
@@ -58,16 +58,16 @@ func (p *Pool) Stop() {
 }
 
 type worker struct {
-	taskFetcher *TaskFetcher
+	taskManager *TaskManager
 	executor    *Executor
 }
 
 func newWorker(
-	taskFetcher *TaskFetcher,
+	taskManager *TaskManager,
 	executor *Executor,
 ) *worker {
 	return &worker{
-		taskFetcher: taskFetcher,
+		taskManager: taskManager,
 		executor:    executor,
 	}
 }
@@ -94,10 +94,13 @@ func (w *worker) run(ctx context.Context) {
 }
 
 func (w *worker) process(ctx context.Context) error {
-	task, err := w.taskFetcher.fetch(ctx)
+	task, err := w.taskManager.fetch(ctx)
 	if err != nil {
 		return err
 	}
 
-	return w.executor.execute(ctx, task)
+	if err := w.executor.execute(ctx, task); err != nil {
+		return w.taskManager.fail(ctx, task.ID, err.Error())
+	}
+	return w.taskManager.success(ctx, task.ID)
 }

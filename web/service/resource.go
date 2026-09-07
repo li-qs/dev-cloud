@@ -76,18 +76,58 @@ func (r *Resource) Create(
 	return rc, t, nil
 }
 
-func (r *Resource) Delete(ctx context.Context, userID, id int) error {
-	return r.repo.Resource.DeleteByUser(ctx, userID, id)
+func (r *Resource) Delete(ctx context.Context, userID, id int) (*ent.Task, error) {
+	t, err := r.repo.Task.Create(
+		ctx,
+		userID,
+		id,
+		task.TypeREMOVE_RESOURCE,
+		map[string]any{},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
-func (r *Resource) Start(ctx context.Context, userID, id int) error {
-	return r.repo.Resource.SetStatusByUser(ctx, userID, id, resource.StatusSTARTING)
+func (r *Resource) Start(ctx context.Context, userID, id int) (*ent.Task, error) {
+	t, err := r.repo.Task.Create(
+		ctx,
+		userID,
+		id,
+		task.TypeSTART_RESOURCE,
+		map[string]any{},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
-func (r *Resource) Stop(ctx context.Context, userID, id int) error {
-	return r.repo.Resource.SetStatusByUser(ctx, userID, id, resource.StatusSTOPPING)
+func (r *Resource) Stop(ctx context.Context, userID, id int) (*ent.Task, error) {
+	t, err := r.repo.Task.Create(
+		ctx,
+		userID,
+		id,
+		task.TypeSTOP_RESOURCE,
+		map[string]any{},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }
 
-func (r *Resource) Restart(ctx context.Context, userID, id int) error {
-	return r.repo.Resource.SetStatusByUser(ctx, userID, id, resource.StatusRESTARTING)
+func (r *Resource) Restart(ctx context.Context, userID, id int) (*ent.Task, error) {
+	t, err := r.repo.Task.Create(
+		ctx,
+		userID,
+		id,
+		task.TypeSTOP_RESOURCE,
+		map[string]any{},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
 }

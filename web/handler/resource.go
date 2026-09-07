@@ -126,12 +126,14 @@ func (r *Resource) Delete(c *echo.Context) error {
 		return echo.ErrUnauthorized
 	}
 
-	err = r.resourceSrv.Delete(c.Request().Context(), user.ID, id)
+	t, err := r.resourceSrv.Delete(c.Request().Context(), user.ID, id)
 	if err != nil {
 		return err
 	}
 
-	return response.JsonSuccess(c)
+	return response.JsonData(c, dto.CreateTaskResponse{
+		TaskID: t.ID,
+	})
 }
 
 func (r *Resource) Start(c *echo.Context) error {
@@ -145,12 +147,14 @@ func (r *Resource) Start(c *echo.Context) error {
 		return echo.ErrUnauthorized
 	}
 
-	err = r.resourceSrv.Start(c.Request().Context(), user.ID, id)
+	t, err := r.resourceSrv.Start(c.Request().Context(), user.ID, id)
 	if err != nil {
 		return err
 	}
 
-	return response.JsonSuccess(c)
+	return response.JsonData(c, dto.CreateTaskResponse{
+		TaskID: t.ID,
+	})
 }
 
 func (r *Resource) Stop(c *echo.Context) error {
@@ -164,12 +168,14 @@ func (r *Resource) Stop(c *echo.Context) error {
 		return echo.ErrUnauthorized
 	}
 
-	err = r.resourceSrv.Stop(c.Request().Context(), user.ID, id)
+	t, err := r.resourceSrv.Stop(c.Request().Context(), user.ID, id)
 	if err != nil {
 		return err
 	}
 
-	return response.JsonSuccess(c)
+	return response.JsonData(c, dto.CreateTaskResponse{
+		TaskID: t.ID,
+	})
 }
 
 func (r *Resource) Restart(c *echo.Context) error {
@@ -183,10 +189,12 @@ func (r *Resource) Restart(c *echo.Context) error {
 		return echo.ErrUnauthorized
 	}
 
-	err = r.resourceSrv.Restart(c.Request().Context(), user.ID, id)
+	t, err := r.resourceSrv.Restart(c.Request().Context(), user.ID, id)
 	if err != nil {
 		return err
 	}
 
-	return response.JsonSuccess(c)
+	return response.JsonData(c, dto.CreateTaskResponse{
+		TaskID: t.ID,
+	})
 }

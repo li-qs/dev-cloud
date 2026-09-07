@@ -42,9 +42,8 @@ func (Resource) Fields() []ent.Field {
 				"STOPPED",
 				"STARTING",
 				"RESTARTING",
-				"DELETING",
-				"DELETED",
-				"FAILED",
+				"REMOVING",
+				"REMOVED",
 			).
 			Default("CREATING"),
 

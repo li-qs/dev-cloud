@@ -18,3 +18,7 @@ type CreateResourceResponse struct {
 	Resource ResourceResponse `json:"resource"`
 	TaskID   int              `json:"task_id"`
 }
+
+type CreateTaskResponse struct {
+	TaskID int `json:"task_id"`
+}

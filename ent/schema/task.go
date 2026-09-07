@@ -28,7 +28,7 @@ func (Task) Fields() []ent.Field {
 				"START_RESOURCE",
 				"STOP_RESOURCE",
 				"RESTART_RESOURCE",
-				"DELETE_RESOURCE",
+				"REMOVE_RESOURCE",
 			),
 
 		field.Enum("status").

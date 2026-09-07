@@ -3,11 +3,11 @@ package worker
 import (
 	"context"
 	"devcloud/ent"
-	"devcloud/ent/resource"
 	"devcloud/ent/task"
 	"devcloud/provider"
 	"devcloud/repo"
 	"devcloud/repo/repos"
+	"devcloud/transition"
 	"fmt"
 )
 
@@ -16,7 +16,7 @@ type Executor struct {
 	registry *provider.Registry
 }
 
-func NewExecutor(
+func newExecutor(
 	repo *repo.Repo,
 	registry *provider.Registry,
 ) *Executor {
@@ -46,8 +46,8 @@ func (e *Executor) execute(ctx context.Context, t *repos.ClaimTaskResult) error 
 	case task.TypeRESTART_RESOURCE:
 		return e.restartResource(ctx, r)
 
-	case task.TypeDELETE_RESOURCE:
-		return e.deleteResource(ctx, r)
+	case task.TypeREMOVE_RESOURCE:
+		return e.removeResource(ctx, r)
 
 	default:
 		return fmt.Errorf("unsupported task type: %s", t.Type)
@@ -56,6 +56,11 @@ func (e *Executor) execute(ctx context.Context, t *repos.ClaimTaskResult) error 
 
 func (e *Executor) createResource(ctx context.Context, r *ent.Resource) error {
 	p, err := e.registry.Get(r.Provider)
+	if err != nil {
+		return err
+	}
+
+	_, err = transition.Resource(r.Status, transition.ResourceCreated)
 	if err != nil {
 		return err
 	}
@@ -70,7 +75,11 @@ func (e *Executor) createResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	return e.repo.Resource.MarkCreated(ctx, r.ID, runtimeID)
+	return e.repo.Resource.SetStatusRUNNING(
+		ctx,
+		r.ID,
+		runtimeID,
+	)
 }
 
 func (e *Executor) startResource(ctx context.Context, r *ent.Resource) error {
@@ -79,16 +88,29 @@ func (e *Executor) startResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	if err := e.repo.Resource.MarkStarting(ctx, r.ID); err != nil {
+	nextStatus, err := transition.Resource(r.Status, transition.ResourceStart)
+	if err != nil {
+		return err
+	}
+
+	if err := e.repo.Resource.SetStatus(
+		ctx,
+		r.ID,
+		nextStatus,
+	); err != nil {
+		return err
+	}
+
+	nextStatus, err = transition.Resource(r.Status, transition.ResourceStarted)
+	if err != nil {
 		return err
 	}
 
 	if err := p.Start(ctx, r.RuntimeID); err != nil {
-		_ = e.repo.Resource.MarkFailed(ctx, r.ID, resource.StatusSTARTING)
 		return err
 	}
 
-	return e.repo.Resource.MarkRunning(ctx, r.ID, resource.StatusSTARTING)
+	return e.repo.Resource.SetStatus(ctx, r.ID, nextStatus)
 }
 
 func (e *Executor) restartResource(ctx context.Context, r *ent.Resource) error {
@@ -97,16 +119,29 @@ func (e *Executor) restartResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	if err := e.repo.Resource.MarkRestarting(ctx, r.ID); err != nil {
+	nextStatus, err := transition.Resource(r.Status, transition.ResourceRestart)
+	if err != nil {
+		return err
+	}
+
+	if err := e.repo.Resource.SetStatus(
+		ctx,
+		r.ID,
+		nextStatus,
+	); err != nil {
+		return err
+	}
+
+	nextStatus, err = transition.Resource(r.Status, transition.ResourceRestarted)
+	if err != nil {
 		return err
 	}
 
 	if err := p.Restart(ctx, r.RuntimeID); err != nil {
-		_ = e.repo.Resource.MarkFailed(ctx, r.ID, resource.StatusRESTARTING)
 		return err
 	}
 
-	return e.repo.Resource.MarkRunning(ctx, r.ID, resource.StatusRESTARTING)
+	return e.repo.Resource.SetStatus(ctx, r.ID, nextStatus)
 }
 
 func (e *Executor) stopResource(ctx context.Context, r *ent.Resource) error {
@@ -115,32 +150,58 @@ func (e *Executor) stopResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	if err := e.repo.Resource.MarkStopping(ctx, r.ID); err != nil {
+	nextStatus, err := transition.Resource(r.Status, transition.ResourceStop)
+	if err != nil {
+		return err
+	}
+
+	if err := e.repo.Resource.SetStatus(
+		ctx,
+		r.ID,
+		nextStatus,
+	); err != nil {
+		return err
+	}
+
+	nextStatus, err = transition.Resource(r.Status, transition.ResourceStopped)
+	if err != nil {
 		return err
 	}
 
 	if err := p.Stop(ctx, r.RuntimeID); err != nil {
-		_ = e.repo.Resource.MarkFailed(ctx, r.ID, resource.StatusSTOPPING)
 		return err
 	}
 
-	return e.repo.Resource.MarkStopped(ctx, r.ID)
+	return e.repo.Resource.SetStatus(ctx, r.ID, nextStatus)
 }
 
-func (e *Executor) deleteResource(ctx context.Context, r *ent.Resource) error {
+func (e *Executor) removeResource(ctx context.Context, r *ent.Resource) error {
 	p, err := e.registry.Get(r.Provider)
 	if err != nil {
 		return err
 	}
 
-	if err := e.repo.Resource.MarkDeleting(ctx, r.ID); err != nil {
+	nextStatus, err := transition.Resource(r.Status, transition.ResourceRemove)
+	if err != nil {
+		return err
+	}
+
+	if err := e.repo.Resource.SetStatus(
+		ctx,
+		r.ID,
+		nextStatus,
+	); err != nil {
+		return err
+	}
+
+	nextStatus, err = transition.Resource(r.Status, transition.ResourceRemoved)
+	if err != nil {
 		return err
 	}
 
 	if err := p.Remove(ctx, r.RuntimeID); err != nil {
-		_ = e.repo.Resource.MarkFailed(ctx, r.ID, resource.StatusDELETING)
 		return err
 	}
 
-	return e.repo.Resource.MarkDeleted(ctx, r.ID)
+	return e.repo.Resource.SetStatus(ctx, r.ID, nextStatus)
 }

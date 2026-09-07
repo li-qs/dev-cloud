@@ -94,7 +94,7 @@ const (
 	TypeSTART_RESOURCE   Type = "START_RESOURCE"
 	TypeSTOP_RESOURCE    Type = "STOP_RESOURCE"
 	TypeRESTART_RESOURCE Type = "RESTART_RESOURCE"
-	TypeDELETE_RESOURCE  Type = "DELETE_RESOURCE"
+	TypeREMOVE_RESOURCE  Type = "REMOVE_RESOURCE"
 )
 
 func (_type Type) String() string {
@@ -104,7 +104,7 @@ func (_type Type) String() string {
 // TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
 func TypeValidator(_type Type) error {
 	switch _type {
-	case TypeCREATE_RESOURCE, TypeSTART_RESOURCE, TypeSTOP_RESOURCE, TypeRESTART_RESOURCE, TypeDELETE_RESOURCE:
+	case TypeCREATE_RESOURCE, TypeSTART_RESOURCE, TypeSTOP_RESOURCE, TypeRESTART_RESOURCE, TypeREMOVE_RESOURCE:
 		return nil
 	default:
 		return fmt.Errorf("task: invalid enum value for type field: %q", _type)
