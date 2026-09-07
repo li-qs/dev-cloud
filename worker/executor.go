@@ -7,6 +7,7 @@ import (
 	"devcloud/ent/task"
 	"devcloud/provider"
 	"devcloud/repo"
+	"devcloud/repo/repos"
 	"fmt"
 )
 
@@ -25,140 +26,121 @@ func NewExecutor(
 	}
 }
 
-func (e *Executor) execute(ctx context.Context, t *ent.Task) error {
+// TODO：错误重试策略
+func (e *Executor) execute(ctx context.Context, t *repos.ClaimTaskResult) error {
+	r, err := e.repo.Resource.Get(ctx, t.ResourceID)
+	if err != nil {
+		return err
+	}
+
 	switch t.Type {
 	case task.TypeCREATE_RESOURCE:
-		return e.createResource(ctx, t)
+		return e.createResource(ctx, r)
 
 	case task.TypeSTART_RESOURCE:
-		return e.startResource(ctx, t)
+		return e.startResource(ctx, r)
 
 	case task.TypeSTOP_RESOURCE:
-		return e.stopResource(ctx, t)
+		return e.stopResource(ctx, r)
 
 	case task.TypeRESTART_RESOURCE:
-		return e.restartResource(ctx, t)
+		return e.restartResource(ctx, r)
 
 	case task.TypeDELETE_RESOURCE:
-		return e.deleteResource(ctx, t)
+		return e.deleteResource(ctx, r)
 
 	default:
 		return fmt.Errorf("unsupported task type: %s", t.Type)
 	}
 }
 
-func (e *Executor) createResource(ctx context.Context, t *ent.Task) error {
-	rsc, err := e.repo.Resource.Get(ctx, t.ResourceID)
+func (e *Executor) createResource(ctx context.Context, r *ent.Resource) error {
+	p, err := e.registry.Get(r.Provider)
 	if err != nil {
 		return err
 	}
 
-	p, err := e.registry.Get(rsc.Provider)
-	if err != nil {
-		return err
-	}
-
-	runtimeID, err := p.Create(ctx, &provider.ResourceSpec{
-		Name:       rsc.Name,
-		Type:       rsc.Type,
-		Config:     rsc.Config,
-		Credential: rsc.Credential,
+	runtimeID, err := p.Create(ctx, provider.ResourceSpec{
+		Name:       r.Name,
+		Image:      r.Image,
+		Config:     r.Config,
+		Credential: provider.Credential{}, // TODO：r.Credential 解密后填入
 	})
 	if err != nil {
 		return err
 	}
 
-	return e.repo.Resource.MarkCreated(ctx, rsc.ID, runtimeID)
+	return e.repo.Resource.MarkCreated(ctx, r.ID, runtimeID)
 }
 
-func (e *Executor) startResource(ctx context.Context, t *ent.Task) error {
-	rsc, err := e.repo.Resource.Get(ctx, t.ResourceID)
+func (e *Executor) startResource(ctx context.Context, r *ent.Resource) error {
+	p, err := e.registry.Get(r.Provider)
 	if err != nil {
 		return err
 	}
 
-	p, err := e.registry.Get(rsc.Provider)
-	if err != nil {
+	if err := e.repo.Resource.MarkStarting(ctx, r.ID); err != nil {
 		return err
 	}
 
-	if err := e.repo.Resource.MarkStarting(ctx, rsc.ID); err != nil {
+	if err := p.Start(ctx, r.RuntimeID); err != nil {
+		_ = e.repo.Resource.MarkFailed(ctx, r.ID, resource.StatusSTARTING)
 		return err
 	}
 
-	if err := p.Start(ctx, rsc.RuntimeID); err != nil {
-		_ = e.repo.Resource.MarkFailed(ctx, rsc.ID, resource.StatusSTARTING)
-		return err
-	}
-
-	return e.repo.Resource.MarkRunning(ctx, rsc.ID, resource.StatusSTARTING)
+	return e.repo.Resource.MarkRunning(ctx, r.ID, resource.StatusSTARTING)
 }
 
-func (e *Executor) restartResource(ctx context.Context, t *ent.Task) error {
-	rsc, err := e.repo.Resource.Get(ctx, t.ResourceID)
+func (e *Executor) restartResource(ctx context.Context, r *ent.Resource) error {
+	p, err := e.registry.Get(r.Provider)
 	if err != nil {
 		return err
 	}
 
-	p, err := e.registry.Get(rsc.Provider)
-	if err != nil {
+	if err := e.repo.Resource.MarkRestarting(ctx, r.ID); err != nil {
 		return err
 	}
 
-	if err := e.repo.Resource.MarkRestarting(ctx, rsc.ID); err != nil {
+	if err := p.Restart(ctx, r.RuntimeID); err != nil {
+		_ = e.repo.Resource.MarkFailed(ctx, r.ID, resource.StatusRESTARTING)
 		return err
 	}
 
-	if err := p.Restart(ctx, rsc.RuntimeID); err != nil {
-		_ = e.repo.Resource.MarkFailed(ctx, rsc.ID, resource.StatusRESTARTING)
-		return err
-	}
-
-	return e.repo.Resource.MarkRunning(ctx, rsc.ID, resource.StatusRESTARTING)
+	return e.repo.Resource.MarkRunning(ctx, r.ID, resource.StatusRESTARTING)
 }
 
-func (e *Executor) stopResource(ctx context.Context, t *ent.Task) error {
-	rsc, err := e.repo.Resource.Get(ctx, t.ResourceID)
+func (e *Executor) stopResource(ctx context.Context, r *ent.Resource) error {
+	p, err := e.registry.Get(r.Provider)
 	if err != nil {
 		return err
 	}
 
-	p, err := e.registry.Get(rsc.Provider)
-	if err != nil {
+	if err := e.repo.Resource.MarkStopping(ctx, r.ID); err != nil {
 		return err
 	}
 
-	if err := e.repo.Resource.MarkStopping(ctx, rsc.ID); err != nil {
+	if err := p.Stop(ctx, r.RuntimeID); err != nil {
+		_ = e.repo.Resource.MarkFailed(ctx, r.ID, resource.StatusSTOPPING)
 		return err
 	}
 
-	if err := p.Stop(ctx, rsc.RuntimeID); err != nil {
-		_ = e.repo.Resource.MarkFailed(ctx, rsc.ID, resource.StatusSTOPPING)
-		return err
-	}
-
-	return e.repo.Resource.MarkStopped(ctx, rsc.ID)
+	return e.repo.Resource.MarkStopped(ctx, r.ID)
 }
 
-func (e *Executor) deleteResource(ctx context.Context, t *ent.Task) error {
-	rsc, err := e.repo.Resource.Get(ctx, t.ResourceID)
+func (e *Executor) deleteResource(ctx context.Context, r *ent.Resource) error {
+	p, err := e.registry.Get(r.Provider)
 	if err != nil {
 		return err
 	}
 
-	p, err := e.registry.Get(rsc.Provider)
-	if err != nil {
+	if err := e.repo.Resource.MarkDeleting(ctx, r.ID); err != nil {
 		return err
 	}
 
-	if err := e.repo.Resource.MarkDeleting(ctx, rsc.ID); err != nil {
+	if err := p.Remove(ctx, r.RuntimeID); err != nil {
+		_ = e.repo.Resource.MarkFailed(ctx, r.ID, resource.StatusDELETING)
 		return err
 	}
 
-	if err := p.Delete(ctx, rsc.RuntimeID); err != nil {
-		_ = e.repo.Resource.MarkFailed(ctx, rsc.ID, resource.StatusDELETING)
-		return err
-	}
-
-	return e.repo.Resource.MarkDeleted(ctx, rsc.ID)
+	return e.repo.Resource.MarkDeleted(ctx, r.ID)
 }

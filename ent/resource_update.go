@@ -63,20 +63,6 @@ func (_u *ResourceUpdate) SetNillableName(v *string) *ResourceUpdate {
 	return _u
 }
 
-// SetType sets the "type" field.
-func (_u *ResourceUpdate) SetType(v string) *ResourceUpdate {
-	_u.mutation.SetType(v)
-	return _u
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *ResourceUpdate) SetNillableType(v *string) *ResourceUpdate {
-	if v != nil {
-		_u.SetType(*v)
-	}
-	return _u
-}
-
 // SetProvider sets the "provider" field.
 func (_u *ResourceUpdate) SetProvider(v resource.Provider) *ResourceUpdate {
 	_u.mutation.SetProvider(v)
@@ -87,6 +73,20 @@ func (_u *ResourceUpdate) SetProvider(v resource.Provider) *ResourceUpdate {
 func (_u *ResourceUpdate) SetNillableProvider(v *resource.Provider) *ResourceUpdate {
 	if v != nil {
 		_u.SetProvider(*v)
+	}
+	return _u
+}
+
+// SetImage sets the "image" field.
+func (_u *ResourceUpdate) SetImage(v string) *ResourceUpdate {
+	_u.mutation.SetImage(v)
+	return _u
+}
+
+// SetNillableImage sets the "image" field if the given value is not nil.
+func (_u *ResourceUpdate) SetNillableImage(v *string) *ResourceUpdate {
+	if v != nil {
+		_u.SetImage(*v)
 	}
 	return _u
 }
@@ -265,14 +265,19 @@ func (_u *ResourceUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Resource.name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.GetType(); ok {
-		if err := resource.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Resource.type": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Provider(); ok {
 		if err := resource.ProviderValidator(v); err != nil {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`ent: validator failed for field "Resource.provider": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Image(); ok {
+		if err := resource.ImageValidator(v); err != nil {
+			return &ValidationError{Name: "image", err: fmt.Errorf(`ent: validator failed for field "Resource.image": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.RuntimeID(); ok {
+		if err := resource.RuntimeIDValidator(v); err != nil {
+			return &ValidationError{Name: "runtime_id", err: fmt.Errorf(`ent: validator failed for field "Resource.runtime_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Status(); ok {
@@ -304,11 +309,11 @@ func (_u *ResourceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(resource.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(resource.FieldType, field.TypeString, value)
-	}
 	if value, ok := _u.mutation.Provider(); ok {
 		_spec.SetField(resource.FieldProvider, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.Image(); ok {
+		_spec.SetField(resource.FieldImage, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.RuntimeID(); ok {
 		_spec.SetField(resource.FieldRuntimeID, field.TypeString, value)
@@ -404,20 +409,6 @@ func (_u *ResourceUpdateOne) SetNillableName(v *string) *ResourceUpdateOne {
 	return _u
 }
 
-// SetType sets the "type" field.
-func (_u *ResourceUpdateOne) SetType(v string) *ResourceUpdateOne {
-	_u.mutation.SetType(v)
-	return _u
-}
-
-// SetNillableType sets the "type" field if the given value is not nil.
-func (_u *ResourceUpdateOne) SetNillableType(v *string) *ResourceUpdateOne {
-	if v != nil {
-		_u.SetType(*v)
-	}
-	return _u
-}
-
 // SetProvider sets the "provider" field.
 func (_u *ResourceUpdateOne) SetProvider(v resource.Provider) *ResourceUpdateOne {
 	_u.mutation.SetProvider(v)
@@ -428,6 +419,20 @@ func (_u *ResourceUpdateOne) SetProvider(v resource.Provider) *ResourceUpdateOne
 func (_u *ResourceUpdateOne) SetNillableProvider(v *resource.Provider) *ResourceUpdateOne {
 	if v != nil {
 		_u.SetProvider(*v)
+	}
+	return _u
+}
+
+// SetImage sets the "image" field.
+func (_u *ResourceUpdateOne) SetImage(v string) *ResourceUpdateOne {
+	_u.mutation.SetImage(v)
+	return _u
+}
+
+// SetNillableImage sets the "image" field if the given value is not nil.
+func (_u *ResourceUpdateOne) SetNillableImage(v *string) *ResourceUpdateOne {
+	if v != nil {
+		_u.SetImage(*v)
 	}
 	return _u
 }
@@ -619,14 +624,19 @@ func (_u *ResourceUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Resource.name": %w`, err)}
 		}
 	}
-	if v, ok := _u.mutation.GetType(); ok {
-		if err := resource.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Resource.type": %w`, err)}
-		}
-	}
 	if v, ok := _u.mutation.Provider(); ok {
 		if err := resource.ProviderValidator(v); err != nil {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`ent: validator failed for field "Resource.provider": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Image(); ok {
+		if err := resource.ImageValidator(v); err != nil {
+			return &ValidationError{Name: "image", err: fmt.Errorf(`ent: validator failed for field "Resource.image": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.RuntimeID(); ok {
+		if err := resource.RuntimeIDValidator(v); err != nil {
+			return &ValidationError{Name: "runtime_id", err: fmt.Errorf(`ent: validator failed for field "Resource.runtime_id": %w`, err)}
 		}
 	}
 	if v, ok := _u.mutation.Status(); ok {
@@ -675,11 +685,11 @@ func (_u *ResourceUpdateOne) sqlSave(ctx context.Context) (_node *Resource, err 
 	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(resource.FieldName, field.TypeString, value)
 	}
-	if value, ok := _u.mutation.GetType(); ok {
-		_spec.SetField(resource.FieldType, field.TypeString, value)
-	}
 	if value, ok := _u.mutation.Provider(); ok {
 		_spec.SetField(resource.FieldProvider, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.Image(); ok {
+		_spec.SetField(resource.FieldImage, field.TypeString, value)
 	}
 	if value, ok := _u.mutation.RuntimeID(); ok {
 		_spec.SetField(resource.FieldRuntimeID, field.TypeString, value)

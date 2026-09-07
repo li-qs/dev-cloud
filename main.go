@@ -24,13 +24,14 @@ import (
 )
 
 func main() {
+	initLogger()
 	if err := run(); err != nil {
 		slog.Error("service stopped", "error", err)
 		os.Exit(1)
 	}
 }
 
-func run() error {
+func initLogger() {
 	slogOpts := &slog.HandlerOptions{}
 	if os.Getenv("ENV") == "development" {
 		slogOpts.Level = slog.LevelDebug
@@ -40,7 +41,9 @@ func run() error {
 	slog.SetDefault(
 		slog.New(slog.NewJSONHandler(os.Stdout, slogOpts)),
 	)
+}
 
+func run() error {
 	var configFile string
 	flag.StringVar(&configFile, "config", "./config.yaml", "config file path")
 	flag.Parse()
@@ -58,8 +61,10 @@ func run() error {
 	}
 	defer psql.Close()
 
-	if err := psql.Schema.Create(ctx); err != nil {
-		return fmt.Errorf("create database schema: %w", err)
+	if os.Getenv("ENV") == "development" {
+		if err := psql.Schema.Create(ctx); err != nil {
+			return fmt.Errorf("create database schema: %w", err)
+		}
 	}
 
 	rdb, err := storage.NewRedis(&cfg)
@@ -71,31 +76,29 @@ func run() error {
 	repo := repo.New(psql)
 	store := store.New(rdb)
 
-	runErr := make(chan error, 1)
+	providers, err := initProviders(&cfg)
+	if err != nil {
+		return fmt.Errorf("init providers: %w", err)
+	}
 
+	workerPool := worker.NewPool(ctx, cfg.WorkerPool, repo, providers)
+	go workerPool.Start()
+	defer workerPool.Stop()
+
+	webErr := make(chan error, 1)
 	webServer := web.NewServer(&cfg, repo, store)
 	go func() {
 		sc := echo.StartConfig{
 			Address:    cfg.ServerAddr,
 			HideBanner: true,
 		}
-		runErr <- sc.Start(ctx, webServer)
+		webErr <- sc.Start(ctx, webServer)
 	}()
-
-	registry := provider.NewRegistry()
-	registry.Register(
-		resource.ProviderDocker,
-		docker.NewProvider(),
-	)
-
-	workerPool := worker.NewPool(ctx, 4, repo, registry)
-	go workerPool.Start()
-	defer workerPool.Stop()
 
 	select {
 	case <-ctx.Done():
 		slog.Info("shutdown", "cause", ctx.Err())
-	case err := <-runErr:
+	case err := <-webErr:
 		if err != nil {
 			return fmt.Errorf("web server: %w", err)
 		}
@@ -103,4 +106,25 @@ func run() error {
 	}
 
 	return nil
+}
+
+func initProviders(c *config.Config) (*provider.Registry, error) {
+	registry := provider.NewRegistry()
+
+	docker, err := docker.NewProvider(
+		c.Docker.Host,
+		c.Docker.TLS.Enabled,
+		c.Docker.TLS.CA,
+		c.Docker.TLS.Cert,
+		c.Docker.TLS.Key,
+	)
+	if err != nil {
+		return nil, err
+	}
+	registry.Register(
+		resource.ProviderDocker,
+		docker,
+	)
+
+	return registry, nil
 }

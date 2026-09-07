@@ -642,8 +642,8 @@ type ResourceMutation struct {
 	user_id       *int
 	adduser_id    *int
 	name          *string
-	_type         *string
 	provider      *resource.Provider
+	image         *string
 	runtime_id    *string
 	status        *resource.Status
 	_config       *map[string]interface{}
@@ -848,42 +848,6 @@ func (m *ResourceMutation) ResetName() {
 	m.name = nil
 }
 
-// SetType sets the "type" field.
-func (m *ResourceMutation) SetType(s string) {
-	m._type = &s
-}
-
-// GetType returns the value of the "type" field in the mutation.
-func (m *ResourceMutation) GetType() (r string, exists bool) {
-	v := m._type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldType returns the old "type" field's value of the Resource entity.
-// If the Resource object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceMutation) OldType(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldType: %w", err)
-	}
-	return oldValue.Type, nil
-}
-
-// ResetType resets all changes to the "type" field.
-func (m *ResourceMutation) ResetType() {
-	m._type = nil
-}
-
 // SetProvider sets the "provider" field.
 func (m *ResourceMutation) SetProvider(r resource.Provider) {
 	m.provider = &r
@@ -918,6 +882,42 @@ func (m *ResourceMutation) OldProvider(ctx context.Context) (v resource.Provider
 // ResetProvider resets all changes to the "provider" field.
 func (m *ResourceMutation) ResetProvider() {
 	m.provider = nil
+}
+
+// SetImage sets the "image" field.
+func (m *ResourceMutation) SetImage(s string) {
+	m.image = &s
+}
+
+// Image returns the value of the "image" field in the mutation.
+func (m *ResourceMutation) Image() (r string, exists bool) {
+	v := m.image
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImage returns the old "image" field's value of the Resource entity.
+// If the Resource object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ResourceMutation) OldImage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImage: %w", err)
+	}
+	return oldValue.Image, nil
+}
+
+// ResetImage resets all changes to the "image" field.
+func (m *ResourceMutation) ResetImage() {
+	m.image = nil
 }
 
 // SetRuntimeID sets the "runtime_id" field.
@@ -1314,11 +1314,11 @@ func (m *ResourceMutation) Fields() []string {
 	if m.name != nil {
 		fields = append(fields, resource.FieldName)
 	}
-	if m._type != nil {
-		fields = append(fields, resource.FieldType)
-	}
 	if m.provider != nil {
 		fields = append(fields, resource.FieldProvider)
+	}
+	if m.image != nil {
+		fields = append(fields, resource.FieldImage)
 	}
 	if m.runtime_id != nil {
 		fields = append(fields, resource.FieldRuntimeID)
@@ -1356,10 +1356,10 @@ func (m *ResourceMutation) Field(name string) (ent.Value, bool) {
 		return m.UserID()
 	case resource.FieldName:
 		return m.Name()
-	case resource.FieldType:
-		return m.GetType()
 	case resource.FieldProvider:
 		return m.Provider()
+	case resource.FieldImage:
+		return m.Image()
 	case resource.FieldRuntimeID:
 		return m.RuntimeID()
 	case resource.FieldStatus:
@@ -1389,10 +1389,10 @@ func (m *ResourceMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldUserID(ctx)
 	case resource.FieldName:
 		return m.OldName(ctx)
-	case resource.FieldType:
-		return m.OldType(ctx)
 	case resource.FieldProvider:
 		return m.OldProvider(ctx)
+	case resource.FieldImage:
+		return m.OldImage(ctx)
 	case resource.FieldRuntimeID:
 		return m.OldRuntimeID(ctx)
 	case resource.FieldStatus:
@@ -1432,19 +1432,19 @@ func (m *ResourceMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetName(v)
 		return nil
-	case resource.FieldType:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetType(v)
-		return nil
 	case resource.FieldProvider:
 		v, ok := value.(resource.Provider)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetProvider(v)
+		return nil
+	case resource.FieldImage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImage(v)
 		return nil
 	case resource.FieldRuntimeID:
 		v, ok := value.(string)
@@ -1605,11 +1605,11 @@ func (m *ResourceMutation) ResetField(name string) error {
 	case resource.FieldName:
 		m.ResetName()
 		return nil
-	case resource.FieldType:
-		m.ResetType()
-		return nil
 	case resource.FieldProvider:
 		m.ResetProvider()
+		return nil
+	case resource.FieldImage:
+		m.ResetImage()
 		return nil
 	case resource.FieldRuntimeID:
 		m.ResetRuntimeID()

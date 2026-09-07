@@ -31,10 +31,14 @@ func init() {
 	resourceDescName := resourceFields[1].Descriptor()
 	// resource.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	resource.NameValidator = resourceDescName.Validators[0].(func(string) error)
-	// resourceDescType is the schema descriptor for type field.
-	resourceDescType := resourceFields[2].Descriptor()
-	// resource.TypeValidator is a validator for the "type" field. It is called by the builders before save.
-	resource.TypeValidator = resourceDescType.Validators[0].(func(string) error)
+	// resourceDescImage is the schema descriptor for image field.
+	resourceDescImage := resourceFields[3].Descriptor()
+	// resource.ImageValidator is a validator for the "image" field. It is called by the builders before save.
+	resource.ImageValidator = resourceDescImage.Validators[0].(func(string) error)
+	// resourceDescRuntimeID is the schema descriptor for runtime_id field.
+	resourceDescRuntimeID := resourceFields[4].Descriptor()
+	// resource.RuntimeIDValidator is a validator for the "runtime_id" field. It is called by the builders before save.
+	resource.RuntimeIDValidator = resourceDescRuntimeID.Validators[0].(func(string) error)
 	// resourceDescCreatedAt is the schema descriptor for created_at field.
 	resourceDescCreatedAt := resourceFields[9].Descriptor()
 	// resource.DefaultCreatedAt holds the default value on creation for the created_at field.

@@ -32,12 +32,6 @@ func (_c *ResourceCreate) SetName(v string) *ResourceCreate {
 	return _c
 }
 
-// SetType sets the "type" field.
-func (_c *ResourceCreate) SetType(v string) *ResourceCreate {
-	_c.mutation.SetType(v)
-	return _c
-}
-
 // SetProvider sets the "provider" field.
 func (_c *ResourceCreate) SetProvider(v resource.Provider) *ResourceCreate {
 	_c.mutation.SetProvider(v)
@@ -49,6 +43,12 @@ func (_c *ResourceCreate) SetNillableProvider(v *resource.Provider) *ResourceCre
 	if v != nil {
 		_c.SetProvider(*v)
 	}
+	return _c
+}
+
+// SetImage sets the "image" field.
+func (_c *ResourceCreate) SetImage(v string) *ResourceCreate {
+	_c.mutation.SetImage(v)
 	return _c
 }
 
@@ -222,20 +222,25 @@ func (_c *ResourceCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Resource.name": %w`, err)}
 		}
 	}
-	if _, ok := _c.mutation.GetType(); !ok {
-		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Resource.type"`)}
-	}
-	if v, ok := _c.mutation.GetType(); ok {
-		if err := resource.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Resource.type": %w`, err)}
-		}
-	}
 	if _, ok := _c.mutation.Provider(); !ok {
 		return &ValidationError{Name: "provider", err: errors.New(`ent: missing required field "Resource.provider"`)}
 	}
 	if v, ok := _c.mutation.Provider(); ok {
 		if err := resource.ProviderValidator(v); err != nil {
 			return &ValidationError{Name: "provider", err: fmt.Errorf(`ent: validator failed for field "Resource.provider": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.Image(); !ok {
+		return &ValidationError{Name: "image", err: errors.New(`ent: missing required field "Resource.image"`)}
+	}
+	if v, ok := _c.mutation.Image(); ok {
+		if err := resource.ImageValidator(v); err != nil {
+			return &ValidationError{Name: "image", err: fmt.Errorf(`ent: validator failed for field "Resource.image": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.RuntimeID(); ok {
+		if err := resource.RuntimeIDValidator(v); err != nil {
+			return &ValidationError{Name: "runtime_id", err: fmt.Errorf(`ent: validator failed for field "Resource.runtime_id": %w`, err)}
 		}
 	}
 	if _, ok := _c.mutation.Status(); !ok {
@@ -286,13 +291,13 @@ func (_c *ResourceCreate) createSpec() (*Resource, *sqlgraph.CreateSpec) {
 		_spec.SetField(resource.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := _c.mutation.GetType(); ok {
-		_spec.SetField(resource.FieldType, field.TypeString, value)
-		_node.Type = value
-	}
 	if value, ok := _c.mutation.Provider(); ok {
 		_spec.SetField(resource.FieldProvider, field.TypeEnum, value)
 		_node.Provider = value
+	}
+	if value, ok := _c.mutation.Image(); ok {
+		_spec.SetField(resource.FieldImage, field.TypeString, value)
+		_node.Image = value
 	}
 	if value, ok := _c.mutation.RuntimeID(); ok {
 		_spec.SetField(resource.FieldRuntimeID, field.TypeString, value)

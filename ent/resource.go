@@ -22,10 +22,10 @@ type Resource struct {
 	UserID int `json:"user_id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// Type holds the value of the "type" field.
-	Type string `json:"type,omitempty"`
 	// Provider holds the value of the "provider" field.
 	Provider resource.Provider `json:"provider,omitempty"`
+	// Image holds the value of the "image" field.
+	Image string `json:"image,omitempty"`
 	// RuntimeID holds the value of the "runtime_id" field.
 	RuntimeID string `json:"runtime_id,omitempty"`
 	// Status holds the value of the "status" field.
@@ -54,7 +54,7 @@ func (*Resource) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case resource.FieldID, resource.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case resource.FieldName, resource.FieldType, resource.FieldProvider, resource.FieldRuntimeID, resource.FieldStatus, resource.FieldCredential, resource.FieldErrorMessage:
+		case resource.FieldName, resource.FieldProvider, resource.FieldImage, resource.FieldRuntimeID, resource.FieldStatus, resource.FieldCredential, resource.FieldErrorMessage:
 			values[i] = new(sql.NullString)
 		case resource.FieldCreatedAt, resource.FieldUpdatedAt, resource.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -91,17 +91,17 @@ func (_m *Resource) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.Name = value.String
 			}
-		case resource.FieldType:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field type", values[i])
-			} else if value.Valid {
-				_m.Type = value.String
-			}
 		case resource.FieldProvider:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field provider", values[i])
 			} else if value.Valid {
 				_m.Provider = resource.Provider(value.String)
+			}
+		case resource.FieldImage:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field image", values[i])
+			} else if value.Valid {
+				_m.Image = value.String
 			}
 		case resource.FieldRuntimeID:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -196,11 +196,11 @@ func (_m *Resource) String() string {
 	builder.WriteString("name=")
 	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
-	builder.WriteString("type=")
-	builder.WriteString(_m.Type)
-	builder.WriteString(", ")
 	builder.WriteString("provider=")
 	builder.WriteString(fmt.Sprintf("%v", _m.Provider))
+	builder.WriteString(", ")
+	builder.WriteString("image=")
+	builder.WriteString(_m.Image)
 	builder.WriteString(", ")
 	builder.WriteString("runtime_id=")
 	builder.WriteString(_m.RuntimeID)

@@ -9,7 +9,7 @@ type CreateResourceRequest struct {
 type ResourceResponse struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name"`
-	Type     string `json:"type"`
+	Image    string `json:"image"`
 	Provider string `json:"provider"`
 	Status   string `json:"status"`
 }

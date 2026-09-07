@@ -18,10 +18,10 @@ const (
 	FieldUserID = "user_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldType holds the string denoting the type field in the database.
-	FieldType = "type"
 	// FieldProvider holds the string denoting the provider field in the database.
 	FieldProvider = "provider"
+	// FieldImage holds the string denoting the image field in the database.
+	FieldImage = "image"
 	// FieldRuntimeID holds the string denoting the runtime_id field in the database.
 	FieldRuntimeID = "runtime_id"
 	// FieldStatus holds the string denoting the status field in the database.
@@ -47,8 +47,8 @@ var Columns = []string{
 	FieldID,
 	FieldUserID,
 	FieldName,
-	FieldType,
 	FieldProvider,
+	FieldImage,
 	FieldRuntimeID,
 	FieldStatus,
 	FieldConfig,
@@ -72,8 +72,10 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// TypeValidator is a validator for the "type" field. It is called by the builders before save.
-	TypeValidator func(string) error
+	// ImageValidator is a validator for the "image" field. It is called by the builders before save.
+	ImageValidator func(string) error
+	// RuntimeIDValidator is a validator for the "runtime_id" field. It is called by the builders before save.
+	RuntimeIDValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -158,14 +160,14 @@ func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
-// ByType orders the results by the type field.
-func ByType(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldType, opts...).ToFunc()
-}
-
 // ByProvider orders the results by the provider field.
 func ByProvider(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldProvider, opts...).ToFunc()
+}
+
+// ByImage orders the results by the image field.
+func ByImage(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImage, opts...).ToFunc()
 }
 
 // ByRuntimeID orders the results by the runtime_id field.

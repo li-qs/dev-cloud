@@ -45,7 +45,7 @@ func (r *Resource) List(c *echo.Context) error {
 		items[i] = dto.ResourceResponse{
 			ID:       r.ID,
 			Name:     r.Name,
-			Type:     r.Type,
+			Image:    r.Image,
 			Provider: r.Provider.String(),
 			Status:   r.Status.String(),
 		}
@@ -72,7 +72,7 @@ func (r *Resource) Get(c *echo.Context) error {
 	return response.JsonData(c, dto.ResourceResponse{
 		ID:       rc.ID,
 		Name:     rc.Name,
-		Type:     rc.Type,
+		Image:    rc.Image,
 		Provider: rc.Provider.String(),
 		Status:   rc.Status.String(),
 	})
@@ -107,7 +107,7 @@ func (r *Resource) Create(c *echo.Context) error {
 		Resource: dto.ResourceResponse{
 			ID:       rc.ID,
 			Name:     rc.Name,
-			Type:     rc.Type,
+			Image:    rc.Image,
 			Provider: rc.Provider.String(),
 			Status:   rc.Status.String(),
 		},

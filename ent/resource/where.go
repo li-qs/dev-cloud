@@ -64,9 +64,9 @@ func Name(v string) predicate.Resource {
 	return predicate.Resource(sql.FieldEQ(FieldName, v))
 }
 
-// Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
-func Type(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldEQ(FieldType, v))
+// Image applies equality check predicate on the "image" field. It's identical to ImageEQ.
+func Image(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldEQ(FieldImage, v))
 }
 
 // RuntimeID applies equality check predicate on the "runtime_id" field. It's identical to RuntimeIDEQ.
@@ -204,71 +204,6 @@ func NameContainsFold(v string) predicate.Resource {
 	return predicate.Resource(sql.FieldContainsFold(FieldName, v))
 }
 
-// TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldEQ(FieldType, v))
-}
-
-// TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldNEQ(FieldType, v))
-}
-
-// TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...string) predicate.Resource {
-	return predicate.Resource(sql.FieldIn(FieldType, vs...))
-}
-
-// TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...string) predicate.Resource {
-	return predicate.Resource(sql.FieldNotIn(FieldType, vs...))
-}
-
-// TypeGT applies the GT predicate on the "type" field.
-func TypeGT(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldGT(FieldType, v))
-}
-
-// TypeGTE applies the GTE predicate on the "type" field.
-func TypeGTE(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldGTE(FieldType, v))
-}
-
-// TypeLT applies the LT predicate on the "type" field.
-func TypeLT(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldLT(FieldType, v))
-}
-
-// TypeLTE applies the LTE predicate on the "type" field.
-func TypeLTE(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldLTE(FieldType, v))
-}
-
-// TypeContains applies the Contains predicate on the "type" field.
-func TypeContains(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldContains(FieldType, v))
-}
-
-// TypeHasPrefix applies the HasPrefix predicate on the "type" field.
-func TypeHasPrefix(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldHasPrefix(FieldType, v))
-}
-
-// TypeHasSuffix applies the HasSuffix predicate on the "type" field.
-func TypeHasSuffix(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldHasSuffix(FieldType, v))
-}
-
-// TypeEqualFold applies the EqualFold predicate on the "type" field.
-func TypeEqualFold(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldEqualFold(FieldType, v))
-}
-
-// TypeContainsFold applies the ContainsFold predicate on the "type" field.
-func TypeContainsFold(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldContainsFold(FieldType, v))
-}
-
 // ProviderEQ applies the EQ predicate on the "provider" field.
 func ProviderEQ(v Provider) predicate.Resource {
 	return predicate.Resource(sql.FieldEQ(FieldProvider, v))
@@ -287,6 +222,71 @@ func ProviderIn(vs ...Provider) predicate.Resource {
 // ProviderNotIn applies the NotIn predicate on the "provider" field.
 func ProviderNotIn(vs ...Provider) predicate.Resource {
 	return predicate.Resource(sql.FieldNotIn(FieldProvider, vs...))
+}
+
+// ImageEQ applies the EQ predicate on the "image" field.
+func ImageEQ(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldEQ(FieldImage, v))
+}
+
+// ImageNEQ applies the NEQ predicate on the "image" field.
+func ImageNEQ(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldNEQ(FieldImage, v))
+}
+
+// ImageIn applies the In predicate on the "image" field.
+func ImageIn(vs ...string) predicate.Resource {
+	return predicate.Resource(sql.FieldIn(FieldImage, vs...))
+}
+
+// ImageNotIn applies the NotIn predicate on the "image" field.
+func ImageNotIn(vs ...string) predicate.Resource {
+	return predicate.Resource(sql.FieldNotIn(FieldImage, vs...))
+}
+
+// ImageGT applies the GT predicate on the "image" field.
+func ImageGT(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldGT(FieldImage, v))
+}
+
+// ImageGTE applies the GTE predicate on the "image" field.
+func ImageGTE(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldGTE(FieldImage, v))
+}
+
+// ImageLT applies the LT predicate on the "image" field.
+func ImageLT(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldLT(FieldImage, v))
+}
+
+// ImageLTE applies the LTE predicate on the "image" field.
+func ImageLTE(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldLTE(FieldImage, v))
+}
+
+// ImageContains applies the Contains predicate on the "image" field.
+func ImageContains(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldContains(FieldImage, v))
+}
+
+// ImageHasPrefix applies the HasPrefix predicate on the "image" field.
+func ImageHasPrefix(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldHasPrefix(FieldImage, v))
+}
+
+// ImageHasSuffix applies the HasSuffix predicate on the "image" field.
+func ImageHasSuffix(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldHasSuffix(FieldImage, v))
+}
+
+// ImageEqualFold applies the EqualFold predicate on the "image" field.
+func ImageEqualFold(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldEqualFold(FieldImage, v))
+}
+
+// ImageContainsFold applies the ContainsFold predicate on the "image" field.
+func ImageContainsFold(v string) predicate.Resource {
+	return predicate.Resource(sql.FieldContainsFold(FieldImage, v))
 }
 
 // RuntimeIDEQ applies the EQ predicate on the "runtime_id" field.

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"go.yaml.in/yaml/v4"
 )
@@ -15,20 +16,32 @@ const (
 )
 
 type Config struct {
-	ServerAddr   string      `yaml:"server_addr"`
-	Postgres     string      `yaml:"postgres"`
-	Redis        RedisConfig `yaml:"redis"`
-	JWTSecret    string      `yaml:"jwt_secret"`
-	TokenSalt    string      `yaml:"token_salt"`
-	AccessTTL    int         `yaml:"access_ttl"`
-	RefreshTTL   int         `yaml:"refresh_ttl"`
-	CookieSecure *bool       `yaml:"cookie_secure"`
+	ServerAddr   string       `yaml:"server_addr"`
+	Postgres     string       `yaml:"postgres"`
+	Redis        RedisConfig  `yaml:"redis"`
+	JWTSecret    string       `yaml:"jwt_secret"`
+	TokenSalt    string       `yaml:"token_salt"`
+	AccessTTL    int          `yaml:"access_ttl"`
+	RefreshTTL   int          `yaml:"refresh_ttl"`
+	CookieSecure *bool        `yaml:"cookie_secure"`
+	WorkerPool   int          `yaml:"worker_pool"`
+	Docker       DockerConfig `yaml:"docker"`
 }
 
 type RedisConfig struct {
 	Addr     string `yaml:"addr"`
 	Password string `yaml:"password"`
 	DB       int    `yaml:"db"`
+}
+
+type DockerConfig struct {
+	Host string `yaml:"host"`
+	TLS  struct {
+		Enabled bool   `yaml:"enabled"`
+		CA      string `yaml:"ca"`
+		Cert    string `yaml:"cert"`
+		Key     string `yaml:"key"`
+	} `yaml:"tls"`
 }
 
 func LoadFile(path string, cfg *Config) error {
@@ -53,6 +66,9 @@ func LoadFile(path string, cfg *Config) error {
 	if cfg.CookieSecure == nil {
 		secure := defaultCookieSecure
 		cfg.CookieSecure = &secure
+	}
+	if cfg.WorkerPool == 0 {
+		cfg.WorkerPool = runtime.NumCPU() * 2
 	}
 
 	if cfg.Postgres == "" {
