@@ -18,7 +18,6 @@ const (
 type Config struct {
 	ServerAddr   string       `yaml:"server_addr"`
 	Postgres     string       `yaml:"postgres"`
-	Redis        RedisConfig  `yaml:"redis"`
 	JWTSecret    string       `yaml:"jwt_secret"`
 	TokenSalt    string       `yaml:"token_salt"`
 	AccessTTL    int          `yaml:"access_ttl"`
@@ -26,12 +25,6 @@ type Config struct {
 	CookieSecure *bool        `yaml:"cookie_secure"`
 	WorkerPool   int          `yaml:"worker_pool"`
 	Docker       DockerConfig `yaml:"docker"`
-}
-
-type RedisConfig struct {
-	Addr     string `yaml:"addr"`
-	Password string `yaml:"password"`
-	DB       int    `yaml:"db"`
 }
 
 type DockerConfig struct {
@@ -75,7 +68,6 @@ func LoadFile(path string, cfg *Config) error {
 	cfg.Postgres = envOr("POSTGRES_DSN", cfg.Postgres)
 	cfg.JWTSecret = envOr("JWT_SECRET", cfg.JWTSecret)
 	cfg.TokenSalt = envOr("TOKEN_SALT", cfg.TokenSalt)
-	cfg.Redis.Password = envOr("REDIS_PASSWORD", cfg.Redis.Password)
 
 	if cfg.Postgres == "" {
 		return fmt.Errorf("postgres is required")

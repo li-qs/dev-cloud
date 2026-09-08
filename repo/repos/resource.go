@@ -8,16 +8,15 @@ import (
 )
 
 type Resource struct {
-	db       *ent.Client
-	resource *ent.ResourceClient
+	db *ent.Client
 }
 
 func NewResource(db *ent.Client) *Resource {
-	return &Resource{db: db, resource: db.Resource}
+	return &Resource{db: db}
 }
 
 func (r *Resource) List(ctx context.Context, userID, offset, limit int) ([]*ent.Resource, error) {
-	return r.resource.
+	return r.db.Resource.
 		Query().
 		Where(
 			resource.UserID(userID),
@@ -29,7 +28,7 @@ func (r *Resource) List(ctx context.Context, userID, offset, limit int) ([]*ent.
 }
 
 func (r *Resource) Count(ctx context.Context, userID int) (int, error) {
-	return r.resource.
+	return r.db.Resource.
 		Query().
 		Where(
 			resource.UserID(userID),
@@ -39,7 +38,7 @@ func (r *Resource) Count(ctx context.Context, userID int) (int, error) {
 }
 
 func (r *Resource) Get(ctx context.Context, id int) (*ent.Resource, error) {
-	return r.resource.
+	return r.db.Resource.
 		Query().
 		Where(
 			resource.ID(id),
@@ -49,7 +48,7 @@ func (r *Resource) Get(ctx context.Context, id int) (*ent.Resource, error) {
 }
 
 func (r *Resource) GetByUser(ctx context.Context, userID, id int) (*ent.Resource, error) {
-	return r.resource.
+	return r.db.Resource.
 		Query().
 		Where(
 			resource.ID(id),
@@ -112,16 +111,26 @@ func (r *Resource) Create(
 }
 
 func (r *Resource) SetStatusRUNNING(ctx context.Context, id int, runtimeID string) error {
-	return r.resource.
+	return r.db.Resource.
 		UpdateOneID(id).
 		SetRuntimeID(runtimeID).
 		SetStatus(resource.StatusRUNNING).
+		ClearErrorMessage().
 		Exec(ctx)
 }
 
 func (r *Resource) SetStatus(ctx context.Context, id int, to resource.Status) error {
-	return r.resource.
+	return r.db.Resource.
 		UpdateOneID(id).
 		SetStatus(to).
+		ClearErrorMessage().
+		Exec(ctx)
+}
+
+func (r *Resource) SetStatusError(ctx context.Context, id int, to resource.Status, errMsg string) error {
+	return r.db.Resource.
+		UpdateOneID(id).
+		SetStatus(to).
+		SetErrorMessage(errMsg).
 		Exec(ctx)
 }

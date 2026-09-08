@@ -15,7 +15,6 @@ import (
 	"devcloud/provider/docker"
 	"devcloud/repo"
 	"devcloud/storage"
-	"devcloud/store"
 	"devcloud/web"
 	"devcloud/web/handler"
 	"devcloud/worker"
@@ -67,14 +66,7 @@ func run() error {
 		}
 	}
 
-	rdb, err := storage.NewRedis(&cfg)
-	if err != nil {
-		return fmt.Errorf("open redis: %w", err)
-	}
-	defer rdb.Close()
-
 	repo := repo.New(psql)
-	store := store.New(rdb)
 
 	providers, dockerProvider, err := initProviders(&cfg)
 	if err != nil {
@@ -87,12 +79,11 @@ func run() error {
 
 	checks := []handler.HealthCheck{
 		{Name: "postgres", Check: sqlDB.PingContext},
-		{Name: "redis", Check: func(ctx context.Context) error { return rdb.Ping(ctx).Err() }},
 		{Name: "docker", Check: dockerProvider.Ping},
 	}
 
 	webErr := make(chan error, 1)
-	webServer := web.NewServer(&cfg, repo, store, checks)
+	webServer := web.NewServer(&cfg, repo, checks)
 	go func() {
 		sc := echo.StartConfig{
 			Address:    cfg.ServerAddr,

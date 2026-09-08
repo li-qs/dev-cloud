@@ -6,6 +6,15 @@ import (
 	"devcloud/ent/resource"
 	"devcloud/ent/task"
 	"devcloud/repo"
+	"devcloud/web/handler/errmsg"
+)
+
+// 各操作允许的资源前置状态（与 worker/transition 的状态机保持一致）。
+var (
+	startAllowed   = []resource.Status{resource.StatusSTOPPED}
+	stopAllowed    = []resource.Status{resource.StatusRUNNING}
+	restartAllowed = []resource.Status{resource.StatusRUNNING}
+	removeAllowed  = []resource.Status{resource.StatusRUNNING, resource.StatusSTOPPED}
 )
 
 type Resource struct {
@@ -69,58 +78,88 @@ func (r *Resource) Create(
 	return rc, t, nil
 }
 
+func (r *Resource) precheckOperation(ctx context.Context, userID, id int, allowed []resource.Status) error {
+	rc, err := r.repo.Resource.GetByUser(ctx, userID, id)
+	if err != nil {
+		return err
+	}
+
+	if !containsStatus(rc.Status, allowed) {
+		return errmsg.ErrResourceState
+	}
+
+	active, err := r.repo.Task.HasActive(ctx, rc.ID)
+	if err != nil {
+		return err
+	}
+	if active {
+		return errmsg.ErrOperationInProgress
+	}
+
+	return nil
+}
+
+func containsStatus(current resource.Status, allowed []resource.Status) bool {
+	for _, s := range allowed {
+		if current == s {
+			return true
+		}
+	}
+	return false
+}
+
 func (r *Resource) Delete(ctx context.Context, userID, id int) (*ent.Task, error) {
-	t, err := r.repo.Task.Create(
+	if err := r.precheckOperation(ctx, userID, id, removeAllowed); err != nil {
+		return nil, err
+	}
+
+	return r.repo.Task.Create(
 		ctx,
 		userID,
 		id,
 		task.TypeREMOVE_RESOURCE,
 		map[string]any{},
 	)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
 }
 
 func (r *Resource) Start(ctx context.Context, userID, id int) (*ent.Task, error) {
-	t, err := r.repo.Task.Create(
+	if err := r.precheckOperation(ctx, userID, id, startAllowed); err != nil {
+		return nil, err
+	}
+
+	return r.repo.Task.Create(
 		ctx,
 		userID,
 		id,
 		task.TypeSTART_RESOURCE,
 		map[string]any{},
 	)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
 }
 
 func (r *Resource) Stop(ctx context.Context, userID, id int) (*ent.Task, error) {
-	t, err := r.repo.Task.Create(
+	if err := r.precheckOperation(ctx, userID, id, stopAllowed); err != nil {
+		return nil, err
+	}
+
+	return r.repo.Task.Create(
 		ctx,
 		userID,
 		id,
 		task.TypeSTOP_RESOURCE,
 		map[string]any{},
 	)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
 }
 
 func (r *Resource) Restart(ctx context.Context, userID, id int) (*ent.Task, error) {
-	t, err := r.repo.Task.Create(
+	if err := r.precheckOperation(ctx, userID, id, restartAllowed); err != nil {
+		return nil, err
+	}
+
+	return r.repo.Task.Create(
 		ctx,
 		userID,
 		id,
 		task.TypeRESTART_RESOURCE,
 		map[string]any{},
 	)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
 }

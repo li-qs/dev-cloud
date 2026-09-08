@@ -8,22 +8,22 @@ import (
 )
 
 type RefreshToken struct {
-	token *ent.RefreshTokenClient
+	db *ent.Client
 }
 
 func NewToken(db *ent.Client) *RefreshToken {
-	return &RefreshToken{token: db.RefreshToken}
+	return &RefreshToken{db: db}
 }
 
 func (r *RefreshToken) Get(ctx context.Context, tokenHash string) (*ent.RefreshToken, error) {
-	return r.token.
+	return r.db.RefreshToken.
 		Query().
 		Where(refreshtoken.TokenHash(tokenHash)).
 		Only(ctx)
 }
 
 func (r *RefreshToken) Create(ctx context.Context, userID int, tokenHash string, expiresAt time.Time) error {
-	_, err := r.token.
+	_, err := r.db.RefreshToken.
 		Create().
 		SetUserID(userID).
 		SetTokenHash(tokenHash).
@@ -33,11 +33,11 @@ func (r *RefreshToken) Create(ctx context.Context, userID int, tokenHash string,
 }
 
 func (r *RefreshToken) Delete(ctx context.Context, id int) error {
-	return r.token.DeleteOneID(id).Exec(ctx)
+	return r.db.RefreshToken.DeleteOneID(id).Exec(ctx)
 }
 
 func (r *RefreshToken) DeleteByUserID(ctx context.Context, userID int) error {
-	_, err := r.token.
+	_, err := r.db.RefreshToken.
 		Delete().
 		Where(refreshtoken.UserID(userID)).
 		Exec(ctx)

@@ -8,16 +8,15 @@ import (
 )
 
 type Task struct {
-	db   *ent.Client
-	task *ent.TaskClient
+	db *ent.Client
 }
 
 func NewTask(db *ent.Client) *Task {
-	return &Task{db: db, task: db.Task}
+	return &Task{db: db}
 }
 
 func (t *Task) Get(ctx context.Context, userID, id int) (*ent.Task, error) {
-	return t.task.
+	return t.db.Task.
 		Query().
 		Where(
 			task.ID(id),
@@ -33,7 +32,7 @@ func (t *Task) Create(
 	_type task.Type,
 	payload map[string]any,
 ) (*ent.Task, error) {
-	return t.task.
+	return t.db.Task.
 		Create().
 		SetUserID(userID).
 		SetResourceID(resourceID).
@@ -41,6 +40,21 @@ func (t *Task) Create(
 		SetStatus(task.StatusPENDING).
 		SetPayload(payload).
 		Save(ctx)
+}
+
+// HasActive 判断该资源是否已有在途任务（PENDING/RUNNING）。
+func (t *Task) HasActive(ctx context.Context, resourceID int) (bool, error) {
+	n, err := t.db.Task.
+		Query().
+		Where(
+			task.ResourceID(resourceID),
+			task.StatusIn(task.StatusPENDING, task.StatusRUNNING),
+		).
+		Count(ctx)
+	if err != nil {
+		return false, err
+	}
+	return n > 0, nil
 }
 
 type ClaimTaskResult struct {
@@ -121,14 +135,14 @@ func (t *Task) Claim(ctx context.Context) (*ClaimTaskResult, error) {
 }
 
 func (t *Task) SetSuccess(ctx context.Context, id int) error {
-	return t.task.
+	return t.db.Task.
 		UpdateOneID(id).
 		SetStatus(task.StatusSUCCESS).
 		Exec(ctx)
 }
 
 func (t *Task) SetFailed(ctx context.Context, id int, errMsg string) error {
-	return t.task.
+	return t.db.Task.
 		UpdateOneID(id).
 		SetStatus(task.StatusFAILED).
 		SetErrorMessage(errMsg).

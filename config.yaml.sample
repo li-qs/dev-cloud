@@ -3,11 +3,6 @@ log_level: info
 
 postgres: host=127.0.0.1 port=5432 user=postgres dbname=dev-cloud password=123456
 
-redis:
-  addr: 127.0.0.1:6379
-  password: 123456
-  db: 0
-
 jwt_secret: "change-me-to-a-random-secret"
 token_salt: "change-me-to-a-random-salt"
 access_ttl: 900

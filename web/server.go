@@ -3,7 +3,6 @@ package web
 import (
 	"devcloud/config"
 	"devcloud/repo"
-	"devcloud/store"
 	"devcloud/web/handler"
 	"devcloud/web/middleware"
 	"devcloud/web/service"
@@ -13,7 +12,7 @@ import (
 	echomw "github.com/labstack/echo/v5/middleware"
 )
 
-func NewServer(cfg *config.Config, repo *repo.Repo, store *store.Store, checks []handler.HealthCheck) *echo.Echo {
+func NewServer(cfg *config.Config, repo *repo.Repo, checks []handler.HealthCheck) *echo.Echo {
 	e := echo.NewWithConfig(echo.Config{
 		HTTPErrorHandler: HTTPErrorHandler,
 		JSONSerializer:   &JSONSerializer{},

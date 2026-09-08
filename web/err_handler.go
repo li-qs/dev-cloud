@@ -45,6 +45,10 @@ func HTTPErrorHandler(c *echo.Context, err error) {
 	case errors.Is(err, errmsg.ErrResourceState):
 		status = http.StatusConflict
 		message = "invalid resource state"
+
+	case errors.Is(err, errmsg.ErrOperationInProgress):
+		status = http.StatusConflict
+		message = "operation already in progress"
 	}
 
 	if status >= 500 {

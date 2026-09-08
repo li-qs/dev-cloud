@@ -54,14 +54,42 @@ func (e *Executor) execute(ctx context.Context, t *repos.ClaimTaskResult) error 
 	}
 }
 
+func (e *Executor) runOperation(
+	ctx context.Context,
+	r *ent.Resource,
+	toMid transition.ResourceEvent,
+	toFinish transition.ResourceEvent,
+	op func(ctx context.Context, runtimeID string) error,
+) error {
+	mid, err := transition.Resource(r.Status, toMid)
+	if err != nil {
+		return err
+	}
+
+	fin, err := transition.Resource(mid, toFinish)
+	if err != nil {
+		return err
+	}
+
+	if err := e.repo.Resource.SetStatus(ctx, r.ID, mid); err != nil {
+		return err
+	}
+
+	if err := op(ctx, r.RuntimeID); err != nil {
+		_ = e.repo.Resource.SetStatusError(ctx, r.ID, r.Status, err.Error())
+		return err
+	}
+
+	return e.repo.Resource.SetStatus(ctx, r.ID, fin)
+}
+
 func (e *Executor) createResource(ctx context.Context, r *ent.Resource) error {
 	p, err := e.registry.Get(r.Provider)
 	if err != nil {
 		return err
 	}
 
-	_, err = transition.Resource(r.Status, transition.ResourceCreated)
-	if err != nil {
+	if _, err := transition.Resource(r.Status, transition.ResourceCreated); err != nil {
 		return err
 	}
 
@@ -72,8 +100,11 @@ func (e *Executor) createResource(ctx context.Context, r *ent.Resource) error {
 		Credential: provider.Credential{}, // TODO：r.Credential 解密后填入
 	})
 	if err != nil {
-		nextStatus, err := transition.Resource(r.Status, transition.ResourceCreateFailed)
-		_ = e.repo.Resource.SetStatus(ctx, r.ID, nextStatus)
+		failed, terr := transition.Resource(r.Status, transition.ResourceCreateFailed)
+		if terr != nil {
+			failed = r.Status
+		}
+		_ = e.repo.Resource.SetStatusError(ctx, r.ID, failed, err.Error())
 		return err
 	}
 
@@ -90,29 +121,7 @@ func (e *Executor) startResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	nextStatus, err := transition.Resource(r.Status, transition.ResourceStart)
-	if err != nil {
-		return err
-	}
-
-	if err := e.repo.Resource.SetStatus(
-		ctx,
-		r.ID,
-		nextStatus,
-	); err != nil {
-		return err
-	}
-
-	nextStatus, err = transition.Resource(nextStatus, transition.ResourceStarted)
-	if err != nil {
-		return err
-	}
-
-	if err := p.Start(ctx, r.RuntimeID); err != nil {
-		return err
-	}
-
-	return e.repo.Resource.SetStatus(ctx, r.ID, nextStatus)
+	return e.runOperation(ctx, r, transition.ResourceStart, transition.ResourceStarted, p.Start)
 }
 
 func (e *Executor) restartResource(ctx context.Context, r *ent.Resource) error {
@@ -121,29 +130,7 @@ func (e *Executor) restartResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	nextStatus, err := transition.Resource(r.Status, transition.ResourceRestart)
-	if err != nil {
-		return err
-	}
-
-	if err := e.repo.Resource.SetStatus(
-		ctx,
-		r.ID,
-		nextStatus,
-	); err != nil {
-		return err
-	}
-
-	nextStatus, err = transition.Resource(nextStatus, transition.ResourceRestarted)
-	if err != nil {
-		return err
-	}
-
-	if err := p.Restart(ctx, r.RuntimeID); err != nil {
-		return err
-	}
-
-	return e.repo.Resource.SetStatus(ctx, r.ID, nextStatus)
+	return e.runOperation(ctx, r, transition.ResourceRestart, transition.ResourceRestarted, p.Restart)
 }
 
 func (e *Executor) stopResource(ctx context.Context, r *ent.Resource) error {
@@ -152,29 +139,7 @@ func (e *Executor) stopResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	nextStatus, err := transition.Resource(r.Status, transition.ResourceStop)
-	if err != nil {
-		return err
-	}
-
-	if err := e.repo.Resource.SetStatus(
-		ctx,
-		r.ID,
-		nextStatus,
-	); err != nil {
-		return err
-	}
-
-	nextStatus, err = transition.Resource(nextStatus, transition.ResourceStopped)
-	if err != nil {
-		return err
-	}
-
-	if err := p.Stop(ctx, r.RuntimeID); err != nil {
-		return err
-	}
-
-	return e.repo.Resource.SetStatus(ctx, r.ID, nextStatus)
+	return e.runOperation(ctx, r, transition.ResourceStop, transition.ResourceStopped, p.Stop)
 }
 
 func (e *Executor) removeResource(ctx context.Context, r *ent.Resource) error {
@@ -183,27 +148,5 @@ func (e *Executor) removeResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	nextStatus, err := transition.Resource(r.Status, transition.ResourceRemove)
-	if err != nil {
-		return err
-	}
-
-	if err := e.repo.Resource.SetStatus(
-		ctx,
-		r.ID,
-		nextStatus,
-	); err != nil {
-		return err
-	}
-
-	nextStatus, err = transition.Resource(nextStatus, transition.ResourceRemoved)
-	if err != nil {
-		return err
-	}
-
-	if err := p.Remove(ctx, r.RuntimeID); err != nil {
-		return err
-	}
-
-	return e.repo.Resource.SetStatus(ctx, r.ID, nextStatus)
+	return e.runOperation(ctx, r, transition.ResourceRemove, transition.ResourceRemoved, p.Remove)
 }
