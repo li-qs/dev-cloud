@@ -13,7 +13,7 @@ import (
 	echomw "github.com/labstack/echo/v5/middleware"
 )
 
-func NewServer(cfg *config.Config, repo *repo.Repo, store *store.Store) *echo.Echo {
+func NewServer(cfg *config.Config, repo *repo.Repo, store *store.Store, checks []handler.HealthCheck) *echo.Echo {
 	e := echo.NewWithConfig(echo.Config{
 		HTTPErrorHandler: HTTPErrorHandler,
 		JSONSerializer:   &JSONSerializer{},
@@ -23,6 +23,7 @@ func NewServer(cfg *config.Config, repo *repo.Repo, store *store.Store) *echo.Ec
 	e.Use(echomw.RequestID())
 	e.Use(echomw.RequestLogger())
 	e.Use(echomw.Recover())
+	e.Use(echomw.BodyLimit(1 << 20))
 
 	loginLimiter := echomw.RateLimiterWithConfig(echomw.RateLimiterConfig{
 		Store: echomw.NewRateLimiterMemoryStore(10),
@@ -43,13 +44,14 @@ func NewServer(cfg *config.Config, repo *repo.Repo, store *store.Store) *echo.Ec
 	resourceSrv := service.NewResource(repo)
 	taskSrv := service.NewTask(repo)
 
-	health := handler.NewHealth()
+	health := handler.NewHealth(checks...)
 	user := handler.NewUser(*cfg.CookieSecure, userSrv)
 	resource := handler.NewResource(resourceSrv)
 	task := handler.NewTask(taskSrv)
 
 	{
 		e.GET("/health", health.Liveness)
+		e.GET("/ready", health.Readiness)
 	}
 
 	api := e.Group("/api")

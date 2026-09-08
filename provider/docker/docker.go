@@ -47,6 +47,12 @@ func NewProvider(
 	}, nil
 }
 
+// Ping 检查 Docker daemon 是否可达，供 /ready 就绪探针使用。
+func (d *Docker) Ping(ctx context.Context) error {
+	_, err := d.client.Ping(ctx, client.PingOptions{})
+	return err
+}
+
 func (d *Docker) Create(ctx context.Context, resource provider.ResourceSpec) (runtimeID string, err error) {
 	res, err := d.client.ContainerCreate(ctx, client.ContainerCreateOptions{
 		Name:  resource.Name,

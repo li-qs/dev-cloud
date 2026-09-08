@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"devcloud/ent"
 	"devcloud/web/handler/errmsg"
 	"devcloud/web/handler/response"
 
@@ -21,6 +22,10 @@ func HTTPErrorHandler(c *echo.Context, err error) {
 	}
 
 	switch {
+	case ent.IsNotFound(err):
+		status = http.StatusNotFound
+		message = "resource not found"
+
 	case errors.Is(err, errmsg.ErrInvalidCredentials):
 		status = http.StatusUnauthorized
 		message = "invalid username or password"

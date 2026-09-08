@@ -71,12 +71,28 @@ func LoadFile(path string, cfg *Config) error {
 		cfg.WorkerPool = runtime.NumCPU() * 2
 	}
 
+	// 敏感配置优先从环境变量读取，避免密钥写入配置文件/仓库。
+	cfg.Postgres = envOr("POSTGRES_DSN", cfg.Postgres)
+	cfg.JWTSecret = envOr("JWT_SECRET", cfg.JWTSecret)
+	cfg.TokenSalt = envOr("TOKEN_SALT", cfg.TokenSalt)
+	cfg.Redis.Password = envOr("REDIS_PASSWORD", cfg.Redis.Password)
+
 	if cfg.Postgres == "" {
 		return fmt.Errorf("postgres is required")
 	}
 	if cfg.JWTSecret == "" {
 		return fmt.Errorf("jwt_secret is required")
 	}
+	if cfg.TokenSalt == "" {
+		return fmt.Errorf("token_salt is required")
+	}
 
 	return nil
+}
+
+func envOr(key, current string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return current
 }

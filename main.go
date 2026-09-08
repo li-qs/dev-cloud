@@ -17,10 +17,10 @@ import (
 	"devcloud/storage"
 	"devcloud/store"
 	"devcloud/web"
+	"devcloud/web/handler"
 	"devcloud/worker"
 
 	"github.com/labstack/echo/v5"
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -55,7 +55,7 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	psql, err := storage.NewPostgres(&cfg)
+	psql, sqlDB, err := storage.NewPostgres(&cfg)
 	if err != nil {
 		return fmt.Errorf("open postgresql: %w", err)
 	}
@@ -76,7 +76,7 @@ func run() error {
 	repo := repo.New(psql)
 	store := store.New(rdb)
 
-	providers, err := initProviders(&cfg)
+	providers, dockerProvider, err := initProviders(&cfg)
 	if err != nil {
 		return fmt.Errorf("init providers: %w", err)
 	}
@@ -85,8 +85,14 @@ func run() error {
 	go workerPool.Start()
 	defer workerPool.Stop()
 
+	checks := []handler.HealthCheck{
+		{Name: "postgres", Check: sqlDB.PingContext},
+		{Name: "redis", Check: func(ctx context.Context) error { return rdb.Ping(ctx).Err() }},
+		{Name: "docker", Check: dockerProvider.Ping},
+	}
+
 	webErr := make(chan error, 1)
-	webServer := web.NewServer(&cfg, repo, store)
+	webServer := web.NewServer(&cfg, repo, store, checks)
 	go func() {
 		sc := echo.StartConfig{
 			Address:    cfg.ServerAddr,
@@ -108,10 +114,10 @@ func run() error {
 	return nil
 }
 
-func initProviders(c *config.Config) (*provider.Registry, error) {
+func initProviders(c *config.Config) (*provider.Registry, *docker.Docker, error) {
 	registry := provider.NewRegistry()
 
-	docker, err := docker.NewProvider(
+	d, err := docker.NewProvider(
 		c.Docker.Host,
 		c.Docker.TLS.Enabled,
 		c.Docker.TLS.CA,
@@ -119,12 +125,12 @@ func initProviders(c *config.Config) (*provider.Registry, error) {
 		c.Docker.TLS.Key,
 	)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	registry.Register(
 		resource.ProviderDocker,
-		docker,
+		d,
 	)
 
-	return registry, nil
+	return registry, d, nil
 }
