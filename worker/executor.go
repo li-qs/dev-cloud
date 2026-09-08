@@ -72,6 +72,8 @@ func (e *Executor) createResource(ctx context.Context, r *ent.Resource) error {
 		Credential: provider.Credential{}, // TODO：r.Credential 解密后填入
 	})
 	if err != nil {
+		nextStatus, err := transition.Resource(r.Status, transition.ResourceCreateFailed)
+		_ = e.repo.Resource.SetStatus(ctx, r.ID, nextStatus)
 		return err
 	}
 
@@ -101,7 +103,7 @@ func (e *Executor) startResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	nextStatus, err = transition.Resource(r.Status, transition.ResourceStarted)
+	nextStatus, err = transition.Resource(nextStatus, transition.ResourceStarted)
 	if err != nil {
 		return err
 	}
@@ -132,7 +134,7 @@ func (e *Executor) restartResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	nextStatus, err = transition.Resource(r.Status, transition.ResourceRestarted)
+	nextStatus, err = transition.Resource(nextStatus, transition.ResourceRestarted)
 	if err != nil {
 		return err
 	}
@@ -163,7 +165,7 @@ func (e *Executor) stopResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	nextStatus, err = transition.Resource(r.Status, transition.ResourceStopped)
+	nextStatus, err = transition.Resource(nextStatus, transition.ResourceStopped)
 	if err != nil {
 		return err
 	}
@@ -194,7 +196,7 @@ func (e *Executor) removeResource(ctx context.Context, r *ent.Resource) error {
 		return err
 	}
 
-	nextStatus, err = transition.Resource(r.Status, transition.ResourceRemoved)
+	nextStatus, err = transition.Resource(nextStatus, transition.ResourceRemoved)
 	if err != nil {
 		return err
 	}

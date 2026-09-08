@@ -42,8 +42,6 @@ func NewProvider(
 		return nil, err
 	}
 
-	c.Ping(context.Background(), client.PingOptions{})
-
 	return &Docker{
 		client: c,
 	}, nil
@@ -76,7 +74,7 @@ func (d *Docker) Restart(ctx context.Context, runtimeID string) error {
 }
 
 func (d *Docker) Remove(ctx context.Context, runtimeID string) error {
-	_, err := d.client.ContainerRemove(ctx, runtimeID, client.ContainerRemoveOptions{})
+	_, err := d.client.ContainerRemove(ctx, runtimeID, client.ContainerRemoveOptions{Force: true})
 	return err
 }
 

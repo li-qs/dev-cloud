@@ -43,7 +43,7 @@ var (
 		{Name: "provider", Type: field.TypeEnum, Enums: []string{"docker"}, Default: "docker"},
 		{Name: "image", Type: field.TypeString, Size: 512},
 		{Name: "runtime_id", Type: field.TypeString, Nullable: true, Size: 128},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"CREATING", "RUNNING", "STOPPING", "STOPPED", "STARTING", "RESTARTING", "REMOVING", "REMOVED"}, Default: "CREATING"},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"CREATING", "RUNNING", "FAILED", "STOPPING", "STOPPED", "STARTING", "RESTARTING", "REMOVING", "REMOVED"}, Default: "CREATING"},
 		{Name: "config", Type: field.TypeJSON, Nullable: true},
 		{Name: "credential", Type: field.TypeString, Nullable: true, Size: 2147483647},
 		{Name: "error_message", Type: field.TypeString, Nullable: true, Size: 2147483647},

@@ -40,7 +40,7 @@ func (r *Resource) List(c *echo.Context) error {
 		return err
 	}
 
-	items := make([]dto.ResourceResponse, count)
+	items := make([]dto.ResourceResponse, len(rs))
 	for i, r := range rs {
 		items[i] = dto.ResourceResponse{
 			ID:       r.ID,
@@ -97,6 +97,7 @@ func (r *Resource) Create(c *echo.Context) error {
 		user.ID,
 		req.Name,
 		resource.Provider(req.Provider),
+		req.Image,
 		req.Config,
 	)
 	if err != nil {

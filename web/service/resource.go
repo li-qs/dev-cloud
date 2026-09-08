@@ -45,28 +45,21 @@ func (r *Resource) Create(
 	userID int,
 	name string,
 	provider resource.Provider,
+	image string,
 	config map[string]any,
 ) (*ent.Resource, *ent.Task, error) {
-	rc, err := r.repo.Resource.Create(
-		ctx,
-		userID,
-		name,
-		provider,
-		config,
-	)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	payload := make(map[string]any)
 	payload["name"] = name
 	payload["provider"] = provider
 	payload["config"] = config
 
-	t, err := r.repo.Task.Create(
+	rc, t, err := r.repo.Resource.Create(
 		ctx,
 		userID,
-		rc.ID,
+		name,
+		provider,
+		image,
+		config,
 		task.TypeCREATE_RESOURCE,
 		payload,
 	)
@@ -123,7 +116,7 @@ func (r *Resource) Restart(ctx context.Context, userID, id int) (*ent.Task, erro
 		ctx,
 		userID,
 		id,
-		task.TypeSTOP_RESOURCE,
+		task.TypeRESTART_RESOURCE,
 		map[string]any{},
 	)
 	if err != nil {

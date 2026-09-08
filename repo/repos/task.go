@@ -5,7 +5,6 @@ import (
 	"devcloud/ent"
 	"devcloud/ent/task"
 	"fmt"
-	"time"
 )
 
 type Task struct {
@@ -21,8 +20,8 @@ func (t *Task) Get(ctx context.Context, userID, id int) (*ent.Task, error) {
 	return t.task.
 		Query().
 		Where(
+			task.ID(id),
 			task.UserID(userID),
-			task.ResourceID(id),
 		).
 		Only(ctx)
 }
@@ -68,12 +67,11 @@ func (t *Task) Claim(ctx context.Context) (*ClaimTaskResult, error) {
 			" resource_id,"+
 			" type"+
 			" FROM task"+
-			" WHERE `status`=$1 AND next_run_at<=$2"+
-			" ORDER BY next_run_at ASC"+
+			" WHERE status=$1"+
+			" ORDER BY id"+
 			" LIMIT 1"+
 			" FOR UPDATE SKIP LOCKED",
 		task.StatusPENDING,
-		time.Now(),
 	)
 	if err != nil {
 		return nil, err
@@ -95,9 +93,9 @@ func (t *Task) Claim(ctx context.Context) (*ClaimTaskResult, error) {
 
 	res, err := tx.ExecContext(
 		ctx,
-		"UPDATE task SET `status`=$1 WHERE id=$2",
+		"UPDATE task SET status=$1 WHERE id=$2",
 		task.StatusRUNNING,
-		task.ID,
+		id,
 	)
 	if err != nil {
 		return nil, err

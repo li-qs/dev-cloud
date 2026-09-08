@@ -3,6 +3,7 @@ package dto
 type CreateResourceRequest struct {
 	Name     string         `json:"name" validate:"required,max=128"`
 	Provider string         `json:"provider" validate:"required,oneof=docker"`
+	Image    string         `json:"image" validate:"required"`
 	Config   map[string]any `json:"config"`
 }
 

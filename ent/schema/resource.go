@@ -38,6 +38,7 @@ func (Resource) Fields() []ent.Field {
 			Values(
 				"CREATING",
 				"RUNNING",
+				"FAILED",
 				"STOPPING",
 				"STOPPED",
 				"STARTING",

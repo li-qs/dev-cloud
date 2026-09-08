@@ -23,3 +23,5 @@ build
 **/__debug_bin*
 
 config.yaml
+
+.opencode

@@ -35,7 +35,7 @@ func Auth(jwtSecret string) echo.MiddlewareFunc {
 				return echo.ErrUnauthorized
 			}
 
-			uid, ok := claims["uid"].(int)
+			uid, ok := claims["uid"].(float64)
 			if !ok {
 				return echo.ErrUnauthorized
 			}
@@ -50,7 +50,7 @@ func Auth(jwtSecret string) echo.MiddlewareFunc {
 			}
 
 			reqctx.SetUser(c, &reqctx.User{
-				ID:       uid,
+				ID:       int(uid),
 				Username: username,
 			})
 

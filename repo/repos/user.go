@@ -35,7 +35,7 @@ func (u *User) Create(
 
 func (u *User) Delete(ctx context.Context, userID int) error {
 	return u.user.
-		Update().
+		UpdateOneID(userID).
 		SetStatus(UserStatusDisabled).
 		Exec(ctx)
 }

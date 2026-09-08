@@ -29,7 +29,8 @@ var resourceTransition = map[struct {
 	event ResourceEvent
 }]resource.Status{
 	// Create
-	{resource.StatusCREATING, ResourceCreated}: resource.StatusRUNNING,
+	{resource.StatusCREATING, ResourceCreated}:      resource.StatusRUNNING,
+	{resource.StatusCREATING, ResourceCreateFailed}: resource.StatusFAILED,
 	// Restart
 	{resource.StatusRUNNING, ResourceRestart}:      resource.StatusRESTARTING,
 	{resource.StatusRESTARTING, ResourceRestarted}: resource.StatusRUNNING,
