@@ -56,26 +56,28 @@ func NewServer(cfg *config.Config, repo *repo.Repo, checks []handler.HealthCheck
 	api := e.Group("/api")
 	{
 		api.POST("/login", user.Login, loginLimiter)
-		api.POST("/refresh", user.RefreshToken)
+		api.POST("/refresh-token", user.RefreshToken)
 	}
 
 	authApi := api.Group("")
 	authApi.Use(middleware.Auth(cfg.JWTSecret))
 	{
 		authApi.POST("/logout", user.Logout)
-		authApi.PUT("/user/password", user.UpdatePassword)
+		authApi.POST("/user/password/update", user.UpdatePassword)
 		authApi.GET("/user", user.UserInfo)
 
 		authApi.GET("/resources", resource.List)
-		authApi.POST("/resources", resource.Create)
-		authApi.GET("/resources/:id", resource.Get)
-		authApi.DELETE("/resources/:id", resource.Delete)
+		authApi.GET("/resource/:id", resource.Get)
 
-		authApi.POST("/resources/:id/start", resource.Start)
-		authApi.POST("/resources/:id/stop", resource.Stop)
-		authApi.POST("/resources/:id/restart", resource.Restart)
+		// 异步任务：
+		authApi.POST("/resource", task.CreateResource)
+		authApi.POST("/resource/:id/remove", task.RemoveResource)
+		authApi.POST("/resource/:id/start", task.StartResource)
+		authApi.POST("/resource/:id/stop", task.StopResource)
+		authApi.POST("/resource/:id/restart", task.RestartResource)
 
-		authApi.GET("/tasks/:id", task.Get)
+		authApi.GET("/tasks/:id", task.List)
+		authApi.GET("/task/:id", task.Get)
 	}
 
 	return e

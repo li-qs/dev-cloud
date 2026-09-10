@@ -47,7 +47,6 @@ func NewProvider(
 	}, nil
 }
 
-// Ping 检查 Docker daemon 是否可达，供 /ready 就绪探针使用。
 func (d *Docker) Ping(ctx context.Context) error {
 	_, err := d.client.Ping(ctx, client.PingOptions{})
 	return err
@@ -80,7 +79,7 @@ func (d *Docker) Restart(ctx context.Context, runtimeID string) error {
 }
 
 func (d *Docker) Remove(ctx context.Context, runtimeID string) error {
-	_, err := d.client.ContainerRemove(ctx, runtimeID, client.ContainerRemoveOptions{Force: true})
+	_, err := d.client.ContainerRemove(ctx, runtimeID, client.ContainerRemoveOptions{})
 	return err
 }
 

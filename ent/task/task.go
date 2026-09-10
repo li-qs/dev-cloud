@@ -32,8 +32,12 @@ const (
 	FieldPayload = "payload"
 	// FieldErrorMessage holds the string denoting the error_message field in the database.
 	FieldErrorMessage = "error_message"
+	// FieldWorkerID holds the string denoting the worker_id field in the database.
+	FieldWorkerID = "worker_id"
 	// FieldStartedAt holds the string denoting the started_at field in the database.
 	FieldStartedAt = "started_at"
+	// FieldHeartbeatAt holds the string denoting the heartbeat_at field in the database.
+	FieldHeartbeatAt = "heartbeat_at"
 	// FieldFinishedAt holds the string denoting the finished_at field in the database.
 	FieldFinishedAt = "finished_at"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -56,7 +60,9 @@ var Columns = []string{
 	FieldNextRunAt,
 	FieldPayload,
 	FieldErrorMessage,
+	FieldWorkerID,
 	FieldStartedAt,
+	FieldHeartbeatAt,
 	FieldFinishedAt,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -77,6 +83,10 @@ var (
 	DefaultAttempts int
 	// DefaultMaxAttempts holds the default value on creation for the "max_attempts" field.
 	DefaultMaxAttempts int
+	// DefaultNextRunAt holds the default value on creation for the "next_run_at" field.
+	DefaultNextRunAt time.Time
+	// WorkerIDValidator is a validator for the "worker_id" field. It is called by the builders before save.
+	WorkerIDValidator func(string) error
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -187,9 +197,19 @@ func ByErrorMessage(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldErrorMessage, opts...).ToFunc()
 }
 
+// ByWorkerID orders the results by the worker_id field.
+func ByWorkerID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWorkerID, opts...).ToFunc()
+}
+
 // ByStartedAt orders the results by the started_at field.
 func ByStartedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStartedAt, opts...).ToFunc()
+}
+
+// ByHeartbeatAt orders the results by the heartbeat_at field.
+func ByHeartbeatAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHeartbeatAt, opts...).ToFunc()
 }
 
 // ByFinishedAt orders the results by the finished_at field.

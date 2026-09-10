@@ -157,26 +157,6 @@ func (_u *ResourceUpdate) ClearCredential() *ResourceUpdate {
 	return _u
 }
 
-// SetErrorMessage sets the "error_message" field.
-func (_u *ResourceUpdate) SetErrorMessage(v string) *ResourceUpdate {
-	_u.mutation.SetErrorMessage(v)
-	return _u
-}
-
-// SetNillableErrorMessage sets the "error_message" field if the given value is not nil.
-func (_u *ResourceUpdate) SetNillableErrorMessage(v *string) *ResourceUpdate {
-	if v != nil {
-		_u.SetErrorMessage(*v)
-	}
-	return _u
-}
-
-// ClearErrorMessage clears the value of the "error_message" field.
-func (_u *ResourceUpdate) ClearErrorMessage() *ResourceUpdate {
-	_u.mutation.ClearErrorMessage()
-	return _u
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (_u *ResourceUpdate) SetCreatedAt(v time.Time) *ResourceUpdate {
 	_u.mutation.SetCreatedAt(v)
@@ -336,12 +316,6 @@ func (_u *ResourceUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.CredentialCleared() {
 		_spec.ClearField(resource.FieldCredential, field.TypeString)
 	}
-	if value, ok := _u.mutation.ErrorMessage(); ok {
-		_spec.SetField(resource.FieldErrorMessage, field.TypeString, value)
-	}
-	if _u.mutation.ErrorMessageCleared() {
-		_spec.ClearField(resource.FieldErrorMessage, field.TypeString)
-	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(resource.FieldCreatedAt, field.TypeTime, value)
 	}
@@ -500,26 +474,6 @@ func (_u *ResourceUpdateOne) SetNillableCredential(v *string) *ResourceUpdateOne
 // ClearCredential clears the value of the "credential" field.
 func (_u *ResourceUpdateOne) ClearCredential() *ResourceUpdateOne {
 	_u.mutation.ClearCredential()
-	return _u
-}
-
-// SetErrorMessage sets the "error_message" field.
-func (_u *ResourceUpdateOne) SetErrorMessage(v string) *ResourceUpdateOne {
-	_u.mutation.SetErrorMessage(v)
-	return _u
-}
-
-// SetNillableErrorMessage sets the "error_message" field if the given value is not nil.
-func (_u *ResourceUpdateOne) SetNillableErrorMessage(v *string) *ResourceUpdateOne {
-	if v != nil {
-		_u.SetErrorMessage(*v)
-	}
-	return _u
-}
-
-// ClearErrorMessage clears the value of the "error_message" field.
-func (_u *ResourceUpdateOne) ClearErrorMessage() *ResourceUpdateOne {
-	_u.mutation.ClearErrorMessage()
 	return _u
 }
 
@@ -711,12 +665,6 @@ func (_u *ResourceUpdateOne) sqlSave(ctx context.Context) (_node *Resource, err 
 	}
 	if _u.mutation.CredentialCleared() {
 		_spec.ClearField(resource.FieldCredential, field.TypeString)
-	}
-	if value, ok := _u.mutation.ErrorMessage(); ok {
-		_spec.SetField(resource.FieldErrorMessage, field.TypeString, value)
-	}
-	if _u.mutation.ErrorMessageCleared() {
-		_spec.ClearField(resource.FieldErrorMessage, field.TypeString)
 	}
 	if value, ok := _u.mutation.CreatedAt(); ok {
 		_spec.SetField(resource.FieldCreatedAt, field.TypeTime, value)

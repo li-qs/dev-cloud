@@ -79,11 +79,6 @@ func Credential(v string) predicate.Resource {
 	return predicate.Resource(sql.FieldEQ(FieldCredential, v))
 }
 
-// ErrorMessage applies equality check predicate on the "error_message" field. It's identical to ErrorMessageEQ.
-func ErrorMessage(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldEQ(FieldErrorMessage, v))
-}
-
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Resource {
 	return predicate.Resource(sql.FieldEQ(FieldCreatedAt, v))
@@ -467,81 +462,6 @@ func CredentialEqualFold(v string) predicate.Resource {
 // CredentialContainsFold applies the ContainsFold predicate on the "credential" field.
 func CredentialContainsFold(v string) predicate.Resource {
 	return predicate.Resource(sql.FieldContainsFold(FieldCredential, v))
-}
-
-// ErrorMessageEQ applies the EQ predicate on the "error_message" field.
-func ErrorMessageEQ(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldEQ(FieldErrorMessage, v))
-}
-
-// ErrorMessageNEQ applies the NEQ predicate on the "error_message" field.
-func ErrorMessageNEQ(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldNEQ(FieldErrorMessage, v))
-}
-
-// ErrorMessageIn applies the In predicate on the "error_message" field.
-func ErrorMessageIn(vs ...string) predicate.Resource {
-	return predicate.Resource(sql.FieldIn(FieldErrorMessage, vs...))
-}
-
-// ErrorMessageNotIn applies the NotIn predicate on the "error_message" field.
-func ErrorMessageNotIn(vs ...string) predicate.Resource {
-	return predicate.Resource(sql.FieldNotIn(FieldErrorMessage, vs...))
-}
-
-// ErrorMessageGT applies the GT predicate on the "error_message" field.
-func ErrorMessageGT(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldGT(FieldErrorMessage, v))
-}
-
-// ErrorMessageGTE applies the GTE predicate on the "error_message" field.
-func ErrorMessageGTE(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldGTE(FieldErrorMessage, v))
-}
-
-// ErrorMessageLT applies the LT predicate on the "error_message" field.
-func ErrorMessageLT(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldLT(FieldErrorMessage, v))
-}
-
-// ErrorMessageLTE applies the LTE predicate on the "error_message" field.
-func ErrorMessageLTE(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldLTE(FieldErrorMessage, v))
-}
-
-// ErrorMessageContains applies the Contains predicate on the "error_message" field.
-func ErrorMessageContains(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldContains(FieldErrorMessage, v))
-}
-
-// ErrorMessageHasPrefix applies the HasPrefix predicate on the "error_message" field.
-func ErrorMessageHasPrefix(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldHasPrefix(FieldErrorMessage, v))
-}
-
-// ErrorMessageHasSuffix applies the HasSuffix predicate on the "error_message" field.
-func ErrorMessageHasSuffix(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldHasSuffix(FieldErrorMessage, v))
-}
-
-// ErrorMessageIsNil applies the IsNil predicate on the "error_message" field.
-func ErrorMessageIsNil() predicate.Resource {
-	return predicate.Resource(sql.FieldIsNull(FieldErrorMessage))
-}
-
-// ErrorMessageNotNil applies the NotNil predicate on the "error_message" field.
-func ErrorMessageNotNil() predicate.Resource {
-	return predicate.Resource(sql.FieldNotNull(FieldErrorMessage))
-}
-
-// ErrorMessageEqualFold applies the EqualFold predicate on the "error_message" field.
-func ErrorMessageEqualFold(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldEqualFold(FieldErrorMessage, v))
-}
-
-// ErrorMessageContainsFold applies the ContainsFold predicate on the "error_message" field.
-func ErrorMessageContainsFold(v string) predicate.Resource {
-	return predicate.Resource(sql.FieldContainsFold(FieldErrorMessage, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

@@ -154,12 +154,6 @@ func (_u *TaskUpdate) SetNillableNextRunAt(v *time.Time) *TaskUpdate {
 	return _u
 }
 
-// ClearNextRunAt clears the value of the "next_run_at" field.
-func (_u *TaskUpdate) ClearNextRunAt() *TaskUpdate {
-	_u.mutation.ClearNextRunAt()
-	return _u
-}
-
 // SetPayload sets the "payload" field.
 func (_u *TaskUpdate) SetPayload(v map[string]interface{}) *TaskUpdate {
 	_u.mutation.SetPayload(v)
@@ -192,6 +186,26 @@ func (_u *TaskUpdate) ClearErrorMessage() *TaskUpdate {
 	return _u
 }
 
+// SetWorkerID sets the "worker_id" field.
+func (_u *TaskUpdate) SetWorkerID(v string) *TaskUpdate {
+	_u.mutation.SetWorkerID(v)
+	return _u
+}
+
+// SetNillableWorkerID sets the "worker_id" field if the given value is not nil.
+func (_u *TaskUpdate) SetNillableWorkerID(v *string) *TaskUpdate {
+	if v != nil {
+		_u.SetWorkerID(*v)
+	}
+	return _u
+}
+
+// ClearWorkerID clears the value of the "worker_id" field.
+func (_u *TaskUpdate) ClearWorkerID() *TaskUpdate {
+	_u.mutation.ClearWorkerID()
+	return _u
+}
+
 // SetStartedAt sets the "started_at" field.
 func (_u *TaskUpdate) SetStartedAt(v time.Time) *TaskUpdate {
 	_u.mutation.SetStartedAt(v)
@@ -209,6 +223,26 @@ func (_u *TaskUpdate) SetNillableStartedAt(v *time.Time) *TaskUpdate {
 // ClearStartedAt clears the value of the "started_at" field.
 func (_u *TaskUpdate) ClearStartedAt() *TaskUpdate {
 	_u.mutation.ClearStartedAt()
+	return _u
+}
+
+// SetHeartbeatAt sets the "heartbeat_at" field.
+func (_u *TaskUpdate) SetHeartbeatAt(v time.Time) *TaskUpdate {
+	_u.mutation.SetHeartbeatAt(v)
+	return _u
+}
+
+// SetNillableHeartbeatAt sets the "heartbeat_at" field if the given value is not nil.
+func (_u *TaskUpdate) SetNillableHeartbeatAt(v *time.Time) *TaskUpdate {
+	if v != nil {
+		_u.SetHeartbeatAt(*v)
+	}
+	return _u
+}
+
+// ClearHeartbeatAt clears the value of the "heartbeat_at" field.
+func (_u *TaskUpdate) ClearHeartbeatAt() *TaskUpdate {
+	_u.mutation.ClearHeartbeatAt()
 	return _u
 }
 
@@ -305,6 +339,11 @@ func (_u *TaskUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Task.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.WorkerID(); ok {
+		if err := task.WorkerIDValidator(v); err != nil {
+			return &ValidationError{Name: "worker_id", err: fmt.Errorf(`ent: validator failed for field "Task.worker_id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -353,9 +392,6 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if value, ok := _u.mutation.NextRunAt(); ok {
 		_spec.SetField(task.FieldNextRunAt, field.TypeTime, value)
 	}
-	if _u.mutation.NextRunAtCleared() {
-		_spec.ClearField(task.FieldNextRunAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.Payload(); ok {
 		_spec.SetField(task.FieldPayload, field.TypeJSON, value)
 	}
@@ -368,11 +404,23 @@ func (_u *TaskUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	if _u.mutation.ErrorMessageCleared() {
 		_spec.ClearField(task.FieldErrorMessage, field.TypeString)
 	}
+	if value, ok := _u.mutation.WorkerID(); ok {
+		_spec.SetField(task.FieldWorkerID, field.TypeString, value)
+	}
+	if _u.mutation.WorkerIDCleared() {
+		_spec.ClearField(task.FieldWorkerID, field.TypeString)
+	}
 	if value, ok := _u.mutation.StartedAt(); ok {
 		_spec.SetField(task.FieldStartedAt, field.TypeTime, value)
 	}
 	if _u.mutation.StartedAtCleared() {
 		_spec.ClearField(task.FieldStartedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.HeartbeatAt(); ok {
+		_spec.SetField(task.FieldHeartbeatAt, field.TypeTime, value)
+	}
+	if _u.mutation.HeartbeatAtCleared() {
+		_spec.ClearField(task.FieldHeartbeatAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.FinishedAt(); ok {
 		_spec.SetField(task.FieldFinishedAt, field.TypeTime, value)
@@ -532,12 +580,6 @@ func (_u *TaskUpdateOne) SetNillableNextRunAt(v *time.Time) *TaskUpdateOne {
 	return _u
 }
 
-// ClearNextRunAt clears the value of the "next_run_at" field.
-func (_u *TaskUpdateOne) ClearNextRunAt() *TaskUpdateOne {
-	_u.mutation.ClearNextRunAt()
-	return _u
-}
-
 // SetPayload sets the "payload" field.
 func (_u *TaskUpdateOne) SetPayload(v map[string]interface{}) *TaskUpdateOne {
 	_u.mutation.SetPayload(v)
@@ -570,6 +612,26 @@ func (_u *TaskUpdateOne) ClearErrorMessage() *TaskUpdateOne {
 	return _u
 }
 
+// SetWorkerID sets the "worker_id" field.
+func (_u *TaskUpdateOne) SetWorkerID(v string) *TaskUpdateOne {
+	_u.mutation.SetWorkerID(v)
+	return _u
+}
+
+// SetNillableWorkerID sets the "worker_id" field if the given value is not nil.
+func (_u *TaskUpdateOne) SetNillableWorkerID(v *string) *TaskUpdateOne {
+	if v != nil {
+		_u.SetWorkerID(*v)
+	}
+	return _u
+}
+
+// ClearWorkerID clears the value of the "worker_id" field.
+func (_u *TaskUpdateOne) ClearWorkerID() *TaskUpdateOne {
+	_u.mutation.ClearWorkerID()
+	return _u
+}
+
 // SetStartedAt sets the "started_at" field.
 func (_u *TaskUpdateOne) SetStartedAt(v time.Time) *TaskUpdateOne {
 	_u.mutation.SetStartedAt(v)
@@ -587,6 +649,26 @@ func (_u *TaskUpdateOne) SetNillableStartedAt(v *time.Time) *TaskUpdateOne {
 // ClearStartedAt clears the value of the "started_at" field.
 func (_u *TaskUpdateOne) ClearStartedAt() *TaskUpdateOne {
 	_u.mutation.ClearStartedAt()
+	return _u
+}
+
+// SetHeartbeatAt sets the "heartbeat_at" field.
+func (_u *TaskUpdateOne) SetHeartbeatAt(v time.Time) *TaskUpdateOne {
+	_u.mutation.SetHeartbeatAt(v)
+	return _u
+}
+
+// SetNillableHeartbeatAt sets the "heartbeat_at" field if the given value is not nil.
+func (_u *TaskUpdateOne) SetNillableHeartbeatAt(v *time.Time) *TaskUpdateOne {
+	if v != nil {
+		_u.SetHeartbeatAt(*v)
+	}
+	return _u
+}
+
+// ClearHeartbeatAt clears the value of the "heartbeat_at" field.
+func (_u *TaskUpdateOne) ClearHeartbeatAt() *TaskUpdateOne {
+	_u.mutation.ClearHeartbeatAt()
 	return _u
 }
 
@@ -696,6 +778,11 @@ func (_u *TaskUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Task.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.WorkerID(); ok {
+		if err := task.WorkerIDValidator(v); err != nil {
+			return &ValidationError{Name: "worker_id", err: fmt.Errorf(`ent: validator failed for field "Task.worker_id": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -761,9 +848,6 @@ func (_u *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 	if value, ok := _u.mutation.NextRunAt(); ok {
 		_spec.SetField(task.FieldNextRunAt, field.TypeTime, value)
 	}
-	if _u.mutation.NextRunAtCleared() {
-		_spec.ClearField(task.FieldNextRunAt, field.TypeTime)
-	}
 	if value, ok := _u.mutation.Payload(); ok {
 		_spec.SetField(task.FieldPayload, field.TypeJSON, value)
 	}
@@ -776,11 +860,23 @@ func (_u *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
 	if _u.mutation.ErrorMessageCleared() {
 		_spec.ClearField(task.FieldErrorMessage, field.TypeString)
 	}
+	if value, ok := _u.mutation.WorkerID(); ok {
+		_spec.SetField(task.FieldWorkerID, field.TypeString, value)
+	}
+	if _u.mutation.WorkerIDCleared() {
+		_spec.ClearField(task.FieldWorkerID, field.TypeString)
+	}
 	if value, ok := _u.mutation.StartedAt(); ok {
 		_spec.SetField(task.FieldStartedAt, field.TypeTime, value)
 	}
 	if _u.mutation.StartedAtCleared() {
 		_spec.ClearField(task.FieldStartedAt, field.TypeTime)
+	}
+	if value, ok := _u.mutation.HeartbeatAt(); ok {
+		_spec.SetField(task.FieldHeartbeatAt, field.TypeTime, value)
+	}
+	if _u.mutation.HeartbeatAtCleared() {
+		_spec.ClearField(task.FieldHeartbeatAt, field.TypeTime)
 	}
 	if value, ok := _u.mutation.FinishedAt(); ok {
 		_spec.SetField(task.FieldFinishedAt, field.TypeTime, value)

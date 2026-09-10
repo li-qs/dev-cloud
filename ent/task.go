@@ -36,8 +36,12 @@ type Task struct {
 	Payload map[string]interface{} `json:"payload,omitempty"`
 	// ErrorMessage holds the value of the "error_message" field.
 	ErrorMessage string `json:"error_message,omitempty"`
+	// WorkerID holds the value of the "worker_id" field.
+	WorkerID string `json:"worker_id,omitempty"`
 	// StartedAt holds the value of the "started_at" field.
 	StartedAt *time.Time `json:"started_at,omitempty"`
+	// HeartbeatAt holds the value of the "heartbeat_at" field.
+	HeartbeatAt *time.Time `json:"heartbeat_at,omitempty"`
 	// FinishedAt holds the value of the "finished_at" field.
 	FinishedAt *time.Time `json:"finished_at,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -56,9 +60,9 @@ func (*Task) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case task.FieldID, task.FieldUserID, task.FieldResourceID, task.FieldAttempts, task.FieldMaxAttempts:
 			values[i] = new(sql.NullInt64)
-		case task.FieldType, task.FieldStatus, task.FieldErrorMessage:
+		case task.FieldType, task.FieldStatus, task.FieldErrorMessage, task.FieldWorkerID:
 			values[i] = new(sql.NullString)
-		case task.FieldNextRunAt, task.FieldStartedAt, task.FieldFinishedAt, task.FieldCreatedAt, task.FieldUpdatedAt:
+		case task.FieldNextRunAt, task.FieldStartedAt, task.FieldHeartbeatAt, task.FieldFinishedAt, task.FieldCreatedAt, task.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -137,12 +141,25 @@ func (_m *Task) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ErrorMessage = value.String
 			}
+		case task.FieldWorkerID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field worker_id", values[i])
+			} else if value.Valid {
+				_m.WorkerID = value.String
+			}
 		case task.FieldStartedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field started_at", values[i])
 			} else if value.Valid {
 				_m.StartedAt = new(time.Time)
 				*_m.StartedAt = value.Time
+			}
+		case task.FieldHeartbeatAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field heartbeat_at", values[i])
+			} else if value.Valid {
+				_m.HeartbeatAt = new(time.Time)
+				*_m.HeartbeatAt = value.Time
 			}
 		case task.FieldFinishedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -226,8 +243,16 @@ func (_m *Task) String() string {
 	builder.WriteString("error_message=")
 	builder.WriteString(_m.ErrorMessage)
 	builder.WriteString(", ")
+	builder.WriteString("worker_id=")
+	builder.WriteString(_m.WorkerID)
+	builder.WriteString(", ")
 	if v := _m.StartedAt; v != nil {
 		builder.WriteString("started_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
+	builder.WriteString(", ")
+	if v := _m.HeartbeatAt; v != nil {
+		builder.WriteString("heartbeat_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")

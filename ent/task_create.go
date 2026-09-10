@@ -114,6 +114,20 @@ func (_c *TaskCreate) SetNillableErrorMessage(v *string) *TaskCreate {
 	return _c
 }
 
+// SetWorkerID sets the "worker_id" field.
+func (_c *TaskCreate) SetWorkerID(v string) *TaskCreate {
+	_c.mutation.SetWorkerID(v)
+	return _c
+}
+
+// SetNillableWorkerID sets the "worker_id" field if the given value is not nil.
+func (_c *TaskCreate) SetNillableWorkerID(v *string) *TaskCreate {
+	if v != nil {
+		_c.SetWorkerID(*v)
+	}
+	return _c
+}
+
 // SetStartedAt sets the "started_at" field.
 func (_c *TaskCreate) SetStartedAt(v time.Time) *TaskCreate {
 	_c.mutation.SetStartedAt(v)
@@ -124,6 +138,20 @@ func (_c *TaskCreate) SetStartedAt(v time.Time) *TaskCreate {
 func (_c *TaskCreate) SetNillableStartedAt(v *time.Time) *TaskCreate {
 	if v != nil {
 		_c.SetStartedAt(*v)
+	}
+	return _c
+}
+
+// SetHeartbeatAt sets the "heartbeat_at" field.
+func (_c *TaskCreate) SetHeartbeatAt(v time.Time) *TaskCreate {
+	_c.mutation.SetHeartbeatAt(v)
+	return _c
+}
+
+// SetNillableHeartbeatAt sets the "heartbeat_at" field if the given value is not nil.
+func (_c *TaskCreate) SetNillableHeartbeatAt(v *time.Time) *TaskCreate {
+	if v != nil {
+		_c.SetHeartbeatAt(*v)
 	}
 	return _c
 }
@@ -217,6 +245,10 @@ func (_c *TaskCreate) defaults() {
 		v := task.DefaultMaxAttempts
 		_c.mutation.SetMaxAttempts(v)
 	}
+	if _, ok := _c.mutation.NextRunAt(); !ok {
+		v := task.DefaultNextRunAt
+		_c.mutation.SetNextRunAt(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := task.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -256,6 +288,14 @@ func (_c *TaskCreate) check() error {
 	}
 	if _, ok := _c.mutation.MaxAttempts(); !ok {
 		return &ValidationError{Name: "max_attempts", err: errors.New(`ent: missing required field "Task.max_attempts"`)}
+	}
+	if _, ok := _c.mutation.NextRunAt(); !ok {
+		return &ValidationError{Name: "next_run_at", err: errors.New(`ent: missing required field "Task.next_run_at"`)}
+	}
+	if v, ok := _c.mutation.WorkerID(); ok {
+		if err := task.WorkerIDValidator(v); err != nil {
+			return &ValidationError{Name: "worker_id", err: fmt.Errorf(`ent: validator failed for field "Task.worker_id": %w`, err)}
+		}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Task.created_at"`)}
@@ -325,9 +365,17 @@ func (_c *TaskCreate) createSpec() (*Task, *sqlgraph.CreateSpec) {
 		_spec.SetField(task.FieldErrorMessage, field.TypeString, value)
 		_node.ErrorMessage = value
 	}
+	if value, ok := _c.mutation.WorkerID(); ok {
+		_spec.SetField(task.FieldWorkerID, field.TypeString, value)
+		_node.WorkerID = value
+	}
 	if value, ok := _c.mutation.StartedAt(); ok {
 		_spec.SetField(task.FieldStartedAt, field.TypeTime, value)
 		_node.StartedAt = &value
+	}
+	if value, ok := _c.mutation.HeartbeatAt(); ok {
+		_spec.SetField(task.FieldHeartbeatAt, field.TypeTime, value)
+		_node.HeartbeatAt = &value
 	}
 	if value, ok := _c.mutation.FinishedAt(); ok {
 		_spec.SetField(task.FieldFinishedAt, field.TypeTime, value)

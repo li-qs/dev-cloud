@@ -20,6 +20,6 @@ type CreateResourceResponse struct {
 	TaskID   int              `json:"task_id"`
 }
 
-type CreateTaskResponse struct {
+type ControlResourceResponse struct {
 	TaskID int `json:"task_id"`
 }

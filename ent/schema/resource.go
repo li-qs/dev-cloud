@@ -54,9 +54,6 @@ func (Resource) Fields() []ent.Field {
 		field.Text("credential").
 			Optional(),
 
-		field.Text("error_message").
-			Optional(),
-
 		field.Time("created_at").
 			Default(time.Now),
 

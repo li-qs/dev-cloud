@@ -47,7 +47,7 @@ func (Task) Fields() []ent.Field {
 			Default(3),
 
 		field.Time("next_run_at").
-			Optional(),
+			Default(time.Now()),
 
 		field.JSON("payload", map[string]any{}).
 			Optional(),
@@ -55,7 +55,15 @@ func (Task) Fields() []ent.Field {
 		field.Text("error_message").
 			Optional(),
 
+		field.String("worker_id").
+			MaxLen(128).
+			Optional(),
+
 		field.Time("started_at").
+			Optional().
+			Nillable(),
+
+		field.Time("heartbeat_at").
 			Optional().
 			Nillable(),
 

@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"devcloud/apperr"
 	"devcloud/ent"
 	"devcloud/web/handler/errmsg"
 	"devcloud/web/handler/response"
@@ -49,6 +50,14 @@ func HTTPErrorHandler(c *echo.Context, err error) {
 	case errors.Is(err, errmsg.ErrOperationInProgress):
 		status = http.StatusConflict
 		message = "operation already in progress"
+
+	case errors.Is(err, apperr.ErrInvalidState):
+		status = http.StatusConflict
+		message = "invalid resource state"
+
+	case errors.Is(err, apperr.ErrConflict):
+		status = http.StatusConflict
+		message = "resource state changed, please retry"
 	}
 
 	if status >= 500 {

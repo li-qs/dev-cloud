@@ -100,20 +100,6 @@ func (_c *ResourceCreate) SetNillableCredential(v *string) *ResourceCreate {
 	return _c
 }
 
-// SetErrorMessage sets the "error_message" field.
-func (_c *ResourceCreate) SetErrorMessage(v string) *ResourceCreate {
-	_c.mutation.SetErrorMessage(v)
-	return _c
-}
-
-// SetNillableErrorMessage sets the "error_message" field if the given value is not nil.
-func (_c *ResourceCreate) SetNillableErrorMessage(v *string) *ResourceCreate {
-	if v != nil {
-		_c.SetErrorMessage(*v)
-	}
-	return _c
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (_c *ResourceCreate) SetCreatedAt(v time.Time) *ResourceCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -314,10 +300,6 @@ func (_c *ResourceCreate) createSpec() (*Resource, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Credential(); ok {
 		_spec.SetField(resource.FieldCredential, field.TypeString, value)
 		_node.Credential = value
-	}
-	if value, ok := _c.mutation.ErrorMessage(); ok {
-		_spec.SetField(resource.FieldErrorMessage, field.TypeString, value)
-		_node.ErrorMessage = value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(resource.FieldCreatedAt, field.TypeTime, value)

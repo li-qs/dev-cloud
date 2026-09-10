@@ -84,9 +84,19 @@ func ErrorMessage(v string) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldErrorMessage, v))
 }
 
+// WorkerID applies equality check predicate on the "worker_id" field. It's identical to WorkerIDEQ.
+func WorkerID(v string) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldWorkerID, v))
+}
+
 // StartedAt applies equality check predicate on the "started_at" field. It's identical to StartedAtEQ.
 func StartedAt(v time.Time) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldStartedAt, v))
+}
+
+// HeartbeatAt applies equality check predicate on the "heartbeat_at" field. It's identical to HeartbeatAtEQ.
+func HeartbeatAt(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldHeartbeatAt, v))
 }
 
 // FinishedAt applies equality check predicate on the "finished_at" field. It's identical to FinishedAtEQ.
@@ -344,16 +354,6 @@ func NextRunAtLTE(v time.Time) predicate.Task {
 	return predicate.Task(sql.FieldLTE(FieldNextRunAt, v))
 }
 
-// NextRunAtIsNil applies the IsNil predicate on the "next_run_at" field.
-func NextRunAtIsNil() predicate.Task {
-	return predicate.Task(sql.FieldIsNull(FieldNextRunAt))
-}
-
-// NextRunAtNotNil applies the NotNil predicate on the "next_run_at" field.
-func NextRunAtNotNil() predicate.Task {
-	return predicate.Task(sql.FieldNotNull(FieldNextRunAt))
-}
-
 // PayloadIsNil applies the IsNil predicate on the "payload" field.
 func PayloadIsNil() predicate.Task {
 	return predicate.Task(sql.FieldIsNull(FieldPayload))
@@ -439,6 +439,81 @@ func ErrorMessageContainsFold(v string) predicate.Task {
 	return predicate.Task(sql.FieldContainsFold(FieldErrorMessage, v))
 }
 
+// WorkerIDEQ applies the EQ predicate on the "worker_id" field.
+func WorkerIDEQ(v string) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldWorkerID, v))
+}
+
+// WorkerIDNEQ applies the NEQ predicate on the "worker_id" field.
+func WorkerIDNEQ(v string) predicate.Task {
+	return predicate.Task(sql.FieldNEQ(FieldWorkerID, v))
+}
+
+// WorkerIDIn applies the In predicate on the "worker_id" field.
+func WorkerIDIn(vs ...string) predicate.Task {
+	return predicate.Task(sql.FieldIn(FieldWorkerID, vs...))
+}
+
+// WorkerIDNotIn applies the NotIn predicate on the "worker_id" field.
+func WorkerIDNotIn(vs ...string) predicate.Task {
+	return predicate.Task(sql.FieldNotIn(FieldWorkerID, vs...))
+}
+
+// WorkerIDGT applies the GT predicate on the "worker_id" field.
+func WorkerIDGT(v string) predicate.Task {
+	return predicate.Task(sql.FieldGT(FieldWorkerID, v))
+}
+
+// WorkerIDGTE applies the GTE predicate on the "worker_id" field.
+func WorkerIDGTE(v string) predicate.Task {
+	return predicate.Task(sql.FieldGTE(FieldWorkerID, v))
+}
+
+// WorkerIDLT applies the LT predicate on the "worker_id" field.
+func WorkerIDLT(v string) predicate.Task {
+	return predicate.Task(sql.FieldLT(FieldWorkerID, v))
+}
+
+// WorkerIDLTE applies the LTE predicate on the "worker_id" field.
+func WorkerIDLTE(v string) predicate.Task {
+	return predicate.Task(sql.FieldLTE(FieldWorkerID, v))
+}
+
+// WorkerIDContains applies the Contains predicate on the "worker_id" field.
+func WorkerIDContains(v string) predicate.Task {
+	return predicate.Task(sql.FieldContains(FieldWorkerID, v))
+}
+
+// WorkerIDHasPrefix applies the HasPrefix predicate on the "worker_id" field.
+func WorkerIDHasPrefix(v string) predicate.Task {
+	return predicate.Task(sql.FieldHasPrefix(FieldWorkerID, v))
+}
+
+// WorkerIDHasSuffix applies the HasSuffix predicate on the "worker_id" field.
+func WorkerIDHasSuffix(v string) predicate.Task {
+	return predicate.Task(sql.FieldHasSuffix(FieldWorkerID, v))
+}
+
+// WorkerIDIsNil applies the IsNil predicate on the "worker_id" field.
+func WorkerIDIsNil() predicate.Task {
+	return predicate.Task(sql.FieldIsNull(FieldWorkerID))
+}
+
+// WorkerIDNotNil applies the NotNil predicate on the "worker_id" field.
+func WorkerIDNotNil() predicate.Task {
+	return predicate.Task(sql.FieldNotNull(FieldWorkerID))
+}
+
+// WorkerIDEqualFold applies the EqualFold predicate on the "worker_id" field.
+func WorkerIDEqualFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldEqualFold(FieldWorkerID, v))
+}
+
+// WorkerIDContainsFold applies the ContainsFold predicate on the "worker_id" field.
+func WorkerIDContainsFold(v string) predicate.Task {
+	return predicate.Task(sql.FieldContainsFold(FieldWorkerID, v))
+}
+
 // StartedAtEQ applies the EQ predicate on the "started_at" field.
 func StartedAtEQ(v time.Time) predicate.Task {
 	return predicate.Task(sql.FieldEQ(FieldStartedAt, v))
@@ -487,6 +562,56 @@ func StartedAtIsNil() predicate.Task {
 // StartedAtNotNil applies the NotNil predicate on the "started_at" field.
 func StartedAtNotNil() predicate.Task {
 	return predicate.Task(sql.FieldNotNull(FieldStartedAt))
+}
+
+// HeartbeatAtEQ applies the EQ predicate on the "heartbeat_at" field.
+func HeartbeatAtEQ(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldEQ(FieldHeartbeatAt, v))
+}
+
+// HeartbeatAtNEQ applies the NEQ predicate on the "heartbeat_at" field.
+func HeartbeatAtNEQ(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldNEQ(FieldHeartbeatAt, v))
+}
+
+// HeartbeatAtIn applies the In predicate on the "heartbeat_at" field.
+func HeartbeatAtIn(vs ...time.Time) predicate.Task {
+	return predicate.Task(sql.FieldIn(FieldHeartbeatAt, vs...))
+}
+
+// HeartbeatAtNotIn applies the NotIn predicate on the "heartbeat_at" field.
+func HeartbeatAtNotIn(vs ...time.Time) predicate.Task {
+	return predicate.Task(sql.FieldNotIn(FieldHeartbeatAt, vs...))
+}
+
+// HeartbeatAtGT applies the GT predicate on the "heartbeat_at" field.
+func HeartbeatAtGT(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldGT(FieldHeartbeatAt, v))
+}
+
+// HeartbeatAtGTE applies the GTE predicate on the "heartbeat_at" field.
+func HeartbeatAtGTE(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldGTE(FieldHeartbeatAt, v))
+}
+
+// HeartbeatAtLT applies the LT predicate on the "heartbeat_at" field.
+func HeartbeatAtLT(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldLT(FieldHeartbeatAt, v))
+}
+
+// HeartbeatAtLTE applies the LTE predicate on the "heartbeat_at" field.
+func HeartbeatAtLTE(v time.Time) predicate.Task {
+	return predicate.Task(sql.FieldLTE(FieldHeartbeatAt, v))
+}
+
+// HeartbeatAtIsNil applies the IsNil predicate on the "heartbeat_at" field.
+func HeartbeatAtIsNil() predicate.Task {
+	return predicate.Task(sql.FieldIsNull(FieldHeartbeatAt))
+}
+
+// HeartbeatAtNotNil applies the NotNil predicate on the "heartbeat_at" field.
+func HeartbeatAtNotNil() predicate.Task {
+	return predicate.Task(sql.FieldNotNull(FieldHeartbeatAt))
 }
 
 // FinishedAtEQ applies the EQ predicate on the "finished_at" field.

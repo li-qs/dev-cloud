@@ -34,8 +34,6 @@ type Resource struct {
 	Config map[string]interface{} `json:"config,omitempty"`
 	// Credential holds the value of the "credential" field.
 	Credential string `json:"credential,omitempty"`
-	// ErrorMessage holds the value of the "error_message" field.
-	ErrorMessage string `json:"error_message,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -54,7 +52,7 @@ func (*Resource) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case resource.FieldID, resource.FieldUserID:
 			values[i] = new(sql.NullInt64)
-		case resource.FieldName, resource.FieldProvider, resource.FieldImage, resource.FieldRuntimeID, resource.FieldStatus, resource.FieldCredential, resource.FieldErrorMessage:
+		case resource.FieldName, resource.FieldProvider, resource.FieldImage, resource.FieldRuntimeID, resource.FieldStatus, resource.FieldCredential:
 			values[i] = new(sql.NullString)
 		case resource.FieldCreatedAt, resource.FieldUpdatedAt, resource.FieldDeletedAt:
 			values[i] = new(sql.NullTime)
@@ -128,12 +126,6 @@ func (_m *Resource) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field credential", values[i])
 			} else if value.Valid {
 				_m.Credential = value.String
-			}
-		case resource.FieldErrorMessage:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field error_message", values[i])
-			} else if value.Valid {
-				_m.ErrorMessage = value.String
 			}
 		case resource.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -213,9 +205,6 @@ func (_m *Resource) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("credential=")
 	builder.WriteString(_m.Credential)
-	builder.WriteString(", ")
-	builder.WriteString("error_message=")
-	builder.WriteString(_m.ErrorMessage)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

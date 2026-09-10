@@ -648,7 +648,6 @@ type ResourceMutation struct {
 	status        *resource.Status
 	_config       *map[string]interface{}
 	credential    *string
-	error_message *string
 	created_at    *time.Time
 	updated_at    *time.Time
 	deleted_at    *time.Time
@@ -1103,55 +1102,6 @@ func (m *ResourceMutation) ResetCredential() {
 	delete(m.clearedFields, resource.FieldCredential)
 }
 
-// SetErrorMessage sets the "error_message" field.
-func (m *ResourceMutation) SetErrorMessage(s string) {
-	m.error_message = &s
-}
-
-// ErrorMessage returns the value of the "error_message" field in the mutation.
-func (m *ResourceMutation) ErrorMessage() (r string, exists bool) {
-	v := m.error_message
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldErrorMessage returns the old "error_message" field's value of the Resource entity.
-// If the Resource object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ResourceMutation) OldErrorMessage(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldErrorMessage is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldErrorMessage requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldErrorMessage: %w", err)
-	}
-	return oldValue.ErrorMessage, nil
-}
-
-// ClearErrorMessage clears the value of the "error_message" field.
-func (m *ResourceMutation) ClearErrorMessage() {
-	m.error_message = nil
-	m.clearedFields[resource.FieldErrorMessage] = struct{}{}
-}
-
-// ErrorMessageCleared returns if the "error_message" field was cleared in this mutation.
-func (m *ResourceMutation) ErrorMessageCleared() bool {
-	_, ok := m.clearedFields[resource.FieldErrorMessage]
-	return ok
-}
-
-// ResetErrorMessage resets all changes to the "error_message" field.
-func (m *ResourceMutation) ResetErrorMessage() {
-	m.error_message = nil
-	delete(m.clearedFields, resource.FieldErrorMessage)
-}
-
 // SetCreatedAt sets the "created_at" field.
 func (m *ResourceMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -1307,7 +1257,7 @@ func (m *ResourceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ResourceMutation) Fields() []string {
-	fields := make([]string, 0, 12)
+	fields := make([]string, 0, 11)
 	if m.user_id != nil {
 		fields = append(fields, resource.FieldUserID)
 	}
@@ -1331,9 +1281,6 @@ func (m *ResourceMutation) Fields() []string {
 	}
 	if m.credential != nil {
 		fields = append(fields, resource.FieldCredential)
-	}
-	if m.error_message != nil {
-		fields = append(fields, resource.FieldErrorMessage)
 	}
 	if m.created_at != nil {
 		fields = append(fields, resource.FieldCreatedAt)
@@ -1368,8 +1315,6 @@ func (m *ResourceMutation) Field(name string) (ent.Value, bool) {
 		return m.Config()
 	case resource.FieldCredential:
 		return m.Credential()
-	case resource.FieldErrorMessage:
-		return m.ErrorMessage()
 	case resource.FieldCreatedAt:
 		return m.CreatedAt()
 	case resource.FieldUpdatedAt:
@@ -1401,8 +1346,6 @@ func (m *ResourceMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldConfig(ctx)
 	case resource.FieldCredential:
 		return m.OldCredential(ctx)
-	case resource.FieldErrorMessage:
-		return m.OldErrorMessage(ctx)
 	case resource.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case resource.FieldUpdatedAt:
@@ -1473,13 +1416,6 @@ func (m *ResourceMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCredential(v)
-		return nil
-	case resource.FieldErrorMessage:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetErrorMessage(v)
 		return nil
 	case resource.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -1556,9 +1492,6 @@ func (m *ResourceMutation) ClearedFields() []string {
 	if m.FieldCleared(resource.FieldCredential) {
 		fields = append(fields, resource.FieldCredential)
 	}
-	if m.FieldCleared(resource.FieldErrorMessage) {
-		fields = append(fields, resource.FieldErrorMessage)
-	}
 	if m.FieldCleared(resource.FieldDeletedAt) {
 		fields = append(fields, resource.FieldDeletedAt)
 	}
@@ -1584,9 +1517,6 @@ func (m *ResourceMutation) ClearField(name string) error {
 		return nil
 	case resource.FieldCredential:
 		m.ClearCredential()
-		return nil
-	case resource.FieldErrorMessage:
-		m.ClearErrorMessage()
 		return nil
 	case resource.FieldDeletedAt:
 		m.ClearDeletedAt()
@@ -1622,9 +1552,6 @@ func (m *ResourceMutation) ResetField(name string) error {
 		return nil
 	case resource.FieldCredential:
 		m.ResetCredential()
-		return nil
-	case resource.FieldErrorMessage:
-		m.ResetErrorMessage()
 		return nil
 	case resource.FieldCreatedAt:
 		m.ResetCreatedAt()
@@ -1706,7 +1633,9 @@ type TaskMutation struct {
 	next_run_at     *time.Time
 	payload         *map[string]interface{}
 	error_message   *string
+	worker_id       *string
 	started_at      *time.Time
+	heartbeat_at    *time.Time
 	finished_at     *time.Time
 	created_at      *time.Time
 	updated_at      *time.Time
@@ -2141,22 +2070,9 @@ func (m *TaskMutation) OldNextRunAt(ctx context.Context) (v time.Time, err error
 	return oldValue.NextRunAt, nil
 }
 
-// ClearNextRunAt clears the value of the "next_run_at" field.
-func (m *TaskMutation) ClearNextRunAt() {
-	m.next_run_at = nil
-	m.clearedFields[task.FieldNextRunAt] = struct{}{}
-}
-
-// NextRunAtCleared returns if the "next_run_at" field was cleared in this mutation.
-func (m *TaskMutation) NextRunAtCleared() bool {
-	_, ok := m.clearedFields[task.FieldNextRunAt]
-	return ok
-}
-
 // ResetNextRunAt resets all changes to the "next_run_at" field.
 func (m *TaskMutation) ResetNextRunAt() {
 	m.next_run_at = nil
-	delete(m.clearedFields, task.FieldNextRunAt)
 }
 
 // SetPayload sets the "payload" field.
@@ -2257,6 +2173,55 @@ func (m *TaskMutation) ResetErrorMessage() {
 	delete(m.clearedFields, task.FieldErrorMessage)
 }
 
+// SetWorkerID sets the "worker_id" field.
+func (m *TaskMutation) SetWorkerID(s string) {
+	m.worker_id = &s
+}
+
+// WorkerID returns the value of the "worker_id" field in the mutation.
+func (m *TaskMutation) WorkerID() (r string, exists bool) {
+	v := m.worker_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWorkerID returns the old "worker_id" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldWorkerID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWorkerID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWorkerID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWorkerID: %w", err)
+	}
+	return oldValue.WorkerID, nil
+}
+
+// ClearWorkerID clears the value of the "worker_id" field.
+func (m *TaskMutation) ClearWorkerID() {
+	m.worker_id = nil
+	m.clearedFields[task.FieldWorkerID] = struct{}{}
+}
+
+// WorkerIDCleared returns if the "worker_id" field was cleared in this mutation.
+func (m *TaskMutation) WorkerIDCleared() bool {
+	_, ok := m.clearedFields[task.FieldWorkerID]
+	return ok
+}
+
+// ResetWorkerID resets all changes to the "worker_id" field.
+func (m *TaskMutation) ResetWorkerID() {
+	m.worker_id = nil
+	delete(m.clearedFields, task.FieldWorkerID)
+}
+
 // SetStartedAt sets the "started_at" field.
 func (m *TaskMutation) SetStartedAt(t time.Time) {
 	m.started_at = &t
@@ -2304,6 +2269,55 @@ func (m *TaskMutation) StartedAtCleared() bool {
 func (m *TaskMutation) ResetStartedAt() {
 	m.started_at = nil
 	delete(m.clearedFields, task.FieldStartedAt)
+}
+
+// SetHeartbeatAt sets the "heartbeat_at" field.
+func (m *TaskMutation) SetHeartbeatAt(t time.Time) {
+	m.heartbeat_at = &t
+}
+
+// HeartbeatAt returns the value of the "heartbeat_at" field in the mutation.
+func (m *TaskMutation) HeartbeatAt() (r time.Time, exists bool) {
+	v := m.heartbeat_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHeartbeatAt returns the old "heartbeat_at" field's value of the Task entity.
+// If the Task object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TaskMutation) OldHeartbeatAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHeartbeatAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHeartbeatAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHeartbeatAt: %w", err)
+	}
+	return oldValue.HeartbeatAt, nil
+}
+
+// ClearHeartbeatAt clears the value of the "heartbeat_at" field.
+func (m *TaskMutation) ClearHeartbeatAt() {
+	m.heartbeat_at = nil
+	m.clearedFields[task.FieldHeartbeatAt] = struct{}{}
+}
+
+// HeartbeatAtCleared returns if the "heartbeat_at" field was cleared in this mutation.
+func (m *TaskMutation) HeartbeatAtCleared() bool {
+	_, ok := m.clearedFields[task.FieldHeartbeatAt]
+	return ok
+}
+
+// ResetHeartbeatAt resets all changes to the "heartbeat_at" field.
+func (m *TaskMutation) ResetHeartbeatAt() {
+	m.heartbeat_at = nil
+	delete(m.clearedFields, task.FieldHeartbeatAt)
 }
 
 // SetFinishedAt sets the "finished_at" field.
@@ -2461,7 +2475,7 @@ func (m *TaskMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TaskMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 15)
 	if m.user_id != nil {
 		fields = append(fields, task.FieldUserID)
 	}
@@ -2489,8 +2503,14 @@ func (m *TaskMutation) Fields() []string {
 	if m.error_message != nil {
 		fields = append(fields, task.FieldErrorMessage)
 	}
+	if m.worker_id != nil {
+		fields = append(fields, task.FieldWorkerID)
+	}
 	if m.started_at != nil {
 		fields = append(fields, task.FieldStartedAt)
+	}
+	if m.heartbeat_at != nil {
+		fields = append(fields, task.FieldHeartbeatAt)
 	}
 	if m.finished_at != nil {
 		fields = append(fields, task.FieldFinishedAt)
@@ -2527,8 +2547,12 @@ func (m *TaskMutation) Field(name string) (ent.Value, bool) {
 		return m.Payload()
 	case task.FieldErrorMessage:
 		return m.ErrorMessage()
+	case task.FieldWorkerID:
+		return m.WorkerID()
 	case task.FieldStartedAt:
 		return m.StartedAt()
+	case task.FieldHeartbeatAt:
+		return m.HeartbeatAt()
 	case task.FieldFinishedAt:
 		return m.FinishedAt()
 	case task.FieldCreatedAt:
@@ -2562,8 +2586,12 @@ func (m *TaskMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldPayload(ctx)
 	case task.FieldErrorMessage:
 		return m.OldErrorMessage(ctx)
+	case task.FieldWorkerID:
+		return m.OldWorkerID(ctx)
 	case task.FieldStartedAt:
 		return m.OldStartedAt(ctx)
+	case task.FieldHeartbeatAt:
+		return m.OldHeartbeatAt(ctx)
 	case task.FieldFinishedAt:
 		return m.OldFinishedAt(ctx)
 	case task.FieldCreatedAt:
@@ -2642,12 +2670,26 @@ func (m *TaskMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetErrorMessage(v)
 		return nil
+	case task.FieldWorkerID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWorkerID(v)
+		return nil
 	case task.FieldStartedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStartedAt(v)
+		return nil
+	case task.FieldHeartbeatAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHeartbeatAt(v)
 		return nil
 	case task.FieldFinishedAt:
 		v, ok := value.(time.Time)
@@ -2751,17 +2793,20 @@ func (m *TaskMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *TaskMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(task.FieldNextRunAt) {
-		fields = append(fields, task.FieldNextRunAt)
-	}
 	if m.FieldCleared(task.FieldPayload) {
 		fields = append(fields, task.FieldPayload)
 	}
 	if m.FieldCleared(task.FieldErrorMessage) {
 		fields = append(fields, task.FieldErrorMessage)
 	}
+	if m.FieldCleared(task.FieldWorkerID) {
+		fields = append(fields, task.FieldWorkerID)
+	}
 	if m.FieldCleared(task.FieldStartedAt) {
 		fields = append(fields, task.FieldStartedAt)
+	}
+	if m.FieldCleared(task.FieldHeartbeatAt) {
+		fields = append(fields, task.FieldHeartbeatAt)
 	}
 	if m.FieldCleared(task.FieldFinishedAt) {
 		fields = append(fields, task.FieldFinishedAt)
@@ -2780,17 +2825,20 @@ func (m *TaskMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *TaskMutation) ClearField(name string) error {
 	switch name {
-	case task.FieldNextRunAt:
-		m.ClearNextRunAt()
-		return nil
 	case task.FieldPayload:
 		m.ClearPayload()
 		return nil
 	case task.FieldErrorMessage:
 		m.ClearErrorMessage()
 		return nil
+	case task.FieldWorkerID:
+		m.ClearWorkerID()
+		return nil
 	case task.FieldStartedAt:
 		m.ClearStartedAt()
+		return nil
+	case task.FieldHeartbeatAt:
+		m.ClearHeartbeatAt()
 		return nil
 	case task.FieldFinishedAt:
 		m.ClearFinishedAt()
@@ -2830,8 +2878,14 @@ func (m *TaskMutation) ResetField(name string) error {
 	case task.FieldErrorMessage:
 		m.ResetErrorMessage()
 		return nil
+	case task.FieldWorkerID:
+		m.ResetWorkerID()
+		return nil
 	case task.FieldStartedAt:
 		m.ResetStartedAt()
+		return nil
+	case task.FieldHeartbeatAt:
+		m.ResetHeartbeatAt()
 		return nil
 	case task.FieldFinishedAt:
 		m.ResetFinishedAt()

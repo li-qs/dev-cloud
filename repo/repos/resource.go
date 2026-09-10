@@ -4,7 +4,6 @@ import (
 	"context"
 	"devcloud/ent"
 	"devcloud/ent/resource"
-	"devcloud/ent/task"
 )
 
 type Resource struct {
@@ -15,6 +14,7 @@ func NewResource(db *ent.Client) *Resource {
 	return &Resource{db: db}
 }
 
+// List 分页返回用户的资源（不含已删除）。
 func (r *Resource) List(ctx context.Context, userID, offset, limit int) ([]*ent.Resource, error) {
 	return r.db.Resource.
 		Query().
@@ -27,6 +27,7 @@ func (r *Resource) List(ctx context.Context, userID, offset, limit int) ([]*ent.
 		All(ctx)
 }
 
+// Count 统计用户的资源总数（不含已删除）。
 func (r *Resource) Count(ctx context.Context, userID int) (int, error) {
 	return r.db.Resource.
 		Query().
@@ -37,6 +38,7 @@ func (r *Resource) Count(ctx context.Context, userID int) (int, error) {
 		Count(ctx)
 }
 
+// Get 按 id 查询资源（worker 使用，不带用户过滤；已删除不可见）。
 func (r *Resource) Get(ctx context.Context, id int) (*ent.Resource, error) {
 	return r.db.Resource.
 		Query().
@@ -47,6 +49,7 @@ func (r *Resource) Get(ctx context.Context, id int) (*ent.Resource, error) {
 		Only(ctx)
 }
 
+// GetByUser 按 id + 用户查询资源，用于对外接口的归属校验；非本人资源返回 NotFound。
 func (r *Resource) GetByUser(ctx context.Context, userID, id int) (*ent.Resource, error) {
 	return r.db.Resource.
 		Query().
@@ -58,79 +61,34 @@ func (r *Resource) GetByUser(ctx context.Context, userID, id int) (*ent.Resource
 		Only(ctx)
 }
 
-func (r *Resource) Create(
-	ctx context.Context,
-	userID int,
-	name string,
-	provider resource.Provider,
-	image string,
-	config map[string]any,
-	_type task.Type,
-	payload map[string]any,
-) (*ent.Resource, *ent.Task, error) {
-	tx, err := r.db.Tx(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-	defer func() {
-		if err != nil {
-			_ = tx.Rollback()
-		}
-	}()
-
-	rsc, err := tx.Resource.
-		Create().
-		SetUserID(userID).
-		SetName(name).
-		SetProvider(provider).
-		SetImage(image).
-		SetStatus(resource.StatusCREATING).
-		SetConfig(config).
-		Save(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	t, err := tx.Task.
-		Create().
-		SetUserID(userID).
-		SetResourceID(rsc.ID).
-		SetType(_type).
-		SetStatus(task.StatusPENDING).
-		SetPayload(payload).
-		Save(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return nil, nil, err
-	}
-
-	return rsc, t, nil
-}
-
-func (r *Resource) SetStatusRUNNING(ctx context.Context, id int, runtimeID string) error {
+// SetCreateSuccess 仅当资源仍为 CREATING 时写入 runtime_id 并置为 STOPPED。
+// 目标 STOPPED 是因为 Docker Create 只创建容器、不启动；条件更新防止覆盖已变化的资源。
+func (r *Resource) SetCreateSuccess(ctx context.Context, id int, runtimeID string) error {
 	return r.db.Resource.
 		UpdateOneID(id).
+		Where(
+			resource.StatusEQ(resource.StatusCREATING),
+		).
 		SetRuntimeID(runtimeID).
-		SetStatus(resource.StatusRUNNING).
-		ClearErrorMessage().
+		SetStatus(resource.StatusSTOPPED).
 		Exec(ctx)
 }
 
-func (r *Resource) SetStatus(ctx context.Context, id int, to resource.Status) error {
+// SetCreateFailed 仅当资源仍为 CREATING 时置为 FAILED。
+func (r *Resource) SetCreateFailed(ctx context.Context, id int) error {
 	return r.db.Resource.
 		UpdateOneID(id).
-		SetStatus(to).
-		ClearErrorMessage().
+		Where(
+			resource.StatusEQ(resource.StatusCREATING),
+		).
+		SetStatus(resource.StatusFAILED).
 		Exec(ctx)
 }
 
-func (r *Resource) SetStatusError(ctx context.Context, id int, to resource.Status, errMsg string) error {
+// SetStatus 无条件更新资源状态，用于 worker 执行成功/失败后的状态推进。
+func (r *Resource) SetStatus(ctx context.Context, id int, status resource.Status) error {
 	return r.db.Resource.
 		UpdateOneID(id).
-		SetStatus(to).
-		SetErrorMessage(errMsg).
+		SetStatus(status).
 		Exec(ctx)
 }

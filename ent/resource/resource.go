@@ -30,8 +30,6 @@ const (
 	FieldConfig = "config"
 	// FieldCredential holds the string denoting the credential field in the database.
 	FieldCredential = "credential"
-	// FieldErrorMessage holds the string denoting the error_message field in the database.
-	FieldErrorMessage = "error_message"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -53,7 +51,6 @@ var Columns = []string{
 	FieldStatus,
 	FieldConfig,
 	FieldCredential,
-	FieldErrorMessage,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
@@ -183,11 +180,6 @@ func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 // ByCredential orders the results by the credential field.
 func ByCredential(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCredential, opts...).ToFunc()
-}
-
-// ByErrorMessage orders the results by the error_message field.
-func ByErrorMessage(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldErrorMessage, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.
